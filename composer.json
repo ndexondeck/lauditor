@@ -1,0 +1,37 @@
+{
+    "name": "ndexondeck/lauditor",
+    "type": "library",
+    "description": "Manages Auditing and Authorization",
+    "keywords": ["audit", "authorize", "task generate"],
+    "license": "FREEWARE",
+
+    "authors": [
+        {
+            "name": "Ohadoma Nduka",
+            "email": "ndexondeck@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.6",
+        "illuminate/support": "5.5.*"
+    },
+
+    "autoload": {
+        "psr-4": {
+            "Ndexondeck\\Lauditor\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Ndexondeck\\Lauditor\\": "src/"
+        }
+    },
+
+    "extra": {
+        "laravel": {
+            "providers": [
+                "\\Ndexondeck\\Lauditor\\LauditorServiceProvider"
+            ]
+        }
+    }
+}
