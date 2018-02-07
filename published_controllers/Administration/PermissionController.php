@@ -9,6 +9,9 @@ use App\Permission;
 use App\Task;
 use Illuminate\Http\Request;
 
+use App\Http\Requests;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 
 class PermissionController extends Controller
@@ -16,24 +19,24 @@ class PermissionController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Support\Facades\Response
      */
     public function index()
     {
         //
-        return Group::enabled()->with('tasks')->latest()->paginate(Util::getPaginate())->toArray();
+        return Util::jsonSuccess(Group::enabled()->with('tasks')->latest()->paginate(Util::getPaginate())->toArray());
     }
 
     /**
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Support\Facades\Response
      */
     public function show($id)
     {
         //
-        return Group::enabled()->with('tasks')->findOrFail($id)->toArray();
+        return Util::jsonSuccess(Group::enabled()->with('tasks')->findOrFail($id)->toArray());
     }
 
     /**
@@ -41,7 +44,7 @@ class PermissionController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Support\Facades\Response
      */
     public function update(Request $request, $id)
     {
@@ -50,7 +53,7 @@ class PermissionController extends Controller
 
         if ( $validator->fails() ) {
             $errors = $validator->messages()->getMessages();
-            return $errors;
+            return Util::jsonFailure($errors,'validation_failure');
         }
 
         $group = Group::enabled()->with('permissions.task')->findOrFail($id);
@@ -64,6 +67,20 @@ class PermissionController extends Controller
         Permission::setAuthAction("Change permission for group : `$group->name`");
 
         $request_tasks = $request->data['tasks'];
+
+        //get tasks dependencies and append to request
+        $routes = Task::whereIn('id',$request_tasks)->lists('route')->toArray();
+
+        if(!Cache::has('permission:dependencies')) Artisan::call('dependency:generate');
+
+        $dependencies = json_decode(Cache::get('permission:dependencies'),true);
+
+        $matches = array_intersect($routes,array_keys($dependencies));
+
+        foreach ($matches as $match){
+            $request_tasks = array_merge($request_tasks, Task::whereIn('route',$dependencies[$match])->lists('id')->toArray());
+        }
+
 
         if(!$group->permissions->isEmpty()){
 
@@ -88,7 +105,7 @@ class PermissionController extends Controller
             $group->permissions()->create(['task_id'=>$task_id]);
         }
 
-        return !empty($new_tasks) ? Permission::isPreventingAuth() : true;
+        return Util::jsonSuccess(!empty($new_tasks) ? Permission::isPreventingAuth() : true);
     }
 
 }

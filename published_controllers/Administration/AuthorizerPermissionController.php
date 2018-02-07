@@ -18,24 +18,24 @@ class AuthorizerPermissionController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Support\Facades\Response
      */
     public function index()
     {
         //
-        return Group::enabled()->with('authorizer_tasks')->latest()->paginate(Util::getPaginate())->toArray();
+        return Util::jsonSuccess(Group::enabled()->with('authorizer_tasks')->latest()->paginate(Util::getPaginate())->toArray());
     }
 
     /**
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Support\Facades\Response
      */
     public function show($id)
     {
         //
-        return Group::enabled()->with('authorizer_tasks')->findOrFail($id)->toArray();
+        return Util::jsonSuccess(Group::enabled()->with('authorizer_tasks')->findOrFail($id)->toArray());
     }
 
     /**
@@ -43,7 +43,7 @@ class AuthorizerPermissionController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Support\Facades\Response
      */
     public function update(Request $request, $id)
     {
@@ -52,7 +52,7 @@ class AuthorizerPermissionController extends Controller
 
         if ( $validator->fails() ) {
             $errors = $validator->messages()->getMessages();
-            return json_failure($errors,'validation_failure');
+            return Util::jsonFailure($errors,'validation_failure');
         }
 
         $group = Group::enabled()->with('authorizers.task')->findOrFail($id);
@@ -88,7 +88,7 @@ class AuthorizerPermissionController extends Controller
             $group->authorizers()->create(['task_id'=>$task_id]);
         }
 
-        return !empty($new_tasks) ? PermissionAuthorizer::isPreventingAuth() : true;
+        return Util::jsonSuccess(!empty($new_tasks) ? PermissionAuthorizer::isPreventingAuth() : true);
     }
 
 }

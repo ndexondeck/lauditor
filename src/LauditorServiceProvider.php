@@ -15,7 +15,7 @@ class LauditorServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $configPath = __DIR__.'/../config/lauditor.php';
+        $configPath = __DIR__.'/../config';
         $modelPath = __DIR__.'/../sample/Model';
         $migrationPath = __DIR__.'/../migrations';
         $viewPath = __DIR__.'/../views';
@@ -26,7 +26,7 @@ class LauditorServiceProvider extends ServiceProvider
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                $configPath => config_path('ndexondeck/lauditor.php'),
+                $configPath => config_path('ndexondeck'),
                 $publishedMigrationPath => database_path('migrations'),
                 $publishedControllerPath => app_path('Http/Controllers'),
                 $publishedUtilities => app_path('Ndexondeck'),

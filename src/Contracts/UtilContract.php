@@ -2,6 +2,8 @@
 
 namespace Ndexondeck\Lauditor\Contracts;
 
+use Illuminate\Support\Facades\Response;
+
 Interface UtilContract{
 
     /**
@@ -65,6 +67,29 @@ Interface UtilContract{
      * @return mixed
      */
     public static function getPaginate();
+
+    /**
+     * eturns successful json failed response
+     * @param $data
+     * @param $code_name
+     * @return Response
+     */
+    public static function jsonFailure($data, $code_name);
+
+    /**
+     * Returns successful json formatted response
+     * @param $data
+     * @return Response
+     */
+    public static function jsonSuccess($data);
+
+    /**
+     *
+     * @param $result
+     * @param null $total
+     * @return array
+     */
+    public static function paginate($result, $total=null);
 
 
 }

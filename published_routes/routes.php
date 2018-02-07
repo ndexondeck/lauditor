@@ -43,6 +43,35 @@ Route::group(['middleware' => ['handshake']], function() {
             Route::put('{id}/reject',['as' =>'reject','uses'=>'AuthorizationController@reject']);
         });
 
+        //Modules Sub Module
+        Route::group(['prefix' => 'modules', 'as' => 'module.'], function() {
+            Route::get('', ['as' => 'index', 'uses' => 'ModuleController@index']);
+            Route::get('tasks', ['as' => 'tasks', 'uses' => 'ModuleController@tasks']);
+            Route::post('', ['as' => 'store', 'uses' => 'ModuleController@store']);
+            Route::get('{id}', ['as' => 'show', 'uses' => 'ModuleController@show']);
+            Route::put('{id}', ['as' => 'update', 'uses' => 'ModuleController@update']);
+            Route::delete('{id}', ['as' => 'destroy', 'uses' => 'ModuleController@destroy']);
+        });
+
+        //Tasks Sub Module
+        Route::group(['prefix' => 'tasks', 'as' => 'task.'], function() {
+            Route::get('', ['as' => 'index', 'uses' => 'TaskController@index']);
+            Route::post('', ['as' => 'store', 'uses' => 'TaskController@store']);
+            Route::get('{id}', ['as' => 'show', 'uses' => 'TaskController@show']);
+            Route::put('{id}', ['as' => 'update', 'uses' => 'TaskController@update']);
+            Route::delete('{id}', ['as' => 'destroy', 'uses' => 'TaskController@destroy']);
+        });
+
+        //Group Sub Module
+        Route::group(['prefix' => 'groups', 'as' => 'group.'], function() {
+            Route::get('', ['as' => 'index', 'uses' => 'GroupController@index']);
+            Route::post('', ['as' => 'store', 'uses' => 'GroupController@store']);
+            Route::get('{id}', ['as' => 'show', 'uses' => 'GroupController@show']);
+            Route::put('{id}', ['as' => 'update', 'uses' => 'GroupController@update']);
+            Route::get('{id}/staff', ['as' => 'staff', 'uses' => 'GroupController@staff']);
+            Route::put('{id}/toggle', ['as' => 'toggle', 'uses' => 'GroupController@toggle']);
+        });
+
     });
 
 });

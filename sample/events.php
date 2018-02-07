@@ -97,7 +97,11 @@ Event::listen('pwd.cycle.threshold.exceeded', function ($login=null) {
 Event::listen('duplicate.resource.auth', function () {
     //Handle what should happen
     throw new \Exception('Requested resource to be authorized may already exist, you may reject this request');
+});
 
+Event::listen('checked.authorizations.only', function () {
+    //Handle what should happen
+    throw new \Exception('Checked authorization can only be of type approved or rejected');
 });
 
 
