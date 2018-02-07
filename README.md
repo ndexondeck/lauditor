@@ -15,28 +15,6 @@ Lauditor is a laravel based auditing and authorization package, which helps you 
     1. [Audit](#audit)
     1. [Authorization](#authorization)
     1. [Generating Tasks](#task-generate)
-1. [Why](#why)
-    1. [Using simply `clone`](#using-simply-clone)
-    1. [Overridding `__clone()`](#overridding-__clone)
-    1. [With `DeepCopy`](#with-deepcopy)
-1. [How it works](#how-it-works)
-1. [Going further](#going-further)
-    1. [Matchers](#matchers)
-        1. [Property name](#property-name)
-        1. [Specific property](#specific-property)
-        1. [Type](#type)
-    1. [Filters](#filters)
-        1. [`SetNullFilter`](#setnullfilter-filter)
-        1. [`KeepFilter`](#keepfilter-filter)
-        1. [`DoctrineCollectionFilter`](#doctrinecollectionfilter-filter)
-        1. [`DoctrineEmptyCollectionFilter`](#doctrineemptycollectionfilter-filter)
-        1. [`DoctrineProxyFilter`](#doctrineproxyfilter-filter)
-        1. [`ReplaceFilter`](#replacefilter-type-filter)
-        1. [`ShallowCopyFilter`](#doctrinecollectionfilter-type-filter)
-1. [Edge cases](#edge-cases)
-1. [Contributing](#contributing)
-    1. [Tests](#tests)
-
 
 ## How?
 
