@@ -7,9 +7,10 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
 use App\Ndexondeck\Lauditor\Util;
-use App\BaseModel as UserBaseModel;
+use App\BaseModel;
+use Ndexondeck\Lauditor\Exceptions\ResponseException;
 
-class Audit extends UserBaseModel
+class Audit extends BaseModel
 {
     //
     public static $audit;
@@ -140,9 +141,9 @@ class Audit extends UserBaseModel
                 $audit->task_route = static::getTempAudit('task_route');
             }
             else{
-                $login = login();
+                $login = Util::login();
                 $audit->login_id = $login->id;
-                $audit->ip = getIp();
+                $audit->ip = Util::getIp();
                 $audit->user_name = $login->user->fullname." ($login->user_type_name)";
                 $audit->task_route = Route::currentRouteName();
             }
@@ -153,7 +154,7 @@ class Audit extends UserBaseModel
 
             if(empty($audit->user_action)) return;
 
-            $audit->ip = getIp();
+            $audit->ip = Util::getIp();
             $audit->after = static::exclusiveJsonAttributes($model->getAttributes());
             $audit->table_name = $model->getTable();
             $audit->rid = static::makeRid();
@@ -176,9 +177,9 @@ class Audit extends UserBaseModel
                 $audit->task_route = static::getTempAudit('task_route');
             }
             else{
-                $login = login();
+                $login = Util::login();
                 $audit->login_id = $login->id;
-                $audit->ip = getIp();
+                $audit->ip = Util::getIp();
                 $audit->user_name = $login->user->fullname." ($login->user_type_name)";
                 $audit->task_route = Route::currentRouteName();
             }
@@ -211,9 +212,9 @@ class Audit extends UserBaseModel
                 $audit->task_route = static::getTempAudit('task_route');
             }
             else{
-                $login = login();
+                $login = Util::login();
                 $audit->login_id = $login->id;
-                $audit->ip = getIp();
+                $audit->ip = Util::getIp();
                 $audit->user_name = $login->user->fullname." ($login->user_type_name)";
                 $audit->task_route = Route::currentRouteName();
             }
@@ -224,12 +225,12 @@ class Audit extends UserBaseModel
 
             if(empty($audit->user_action)) return;
 
-            $audit->ip = getIp();
+            $audit->ip = Util::getIp();
             $audit->table_name = $model->getTable();
             $audit->rid = static::makeRid();
             $audit->trail_id = $model->id;
             $audit->trail_type = "App\\".$baseClass;
-            $audit->login_id = getLoginId();
+            $audit->login_id = Util::getLoginId();
             $audit->save();
         });
     }
@@ -372,7 +373,7 @@ class Audit extends UserBaseModel
             if($record_tag == "" or strstr($audit->user_action,$record_tag))$record_tag = "";
             else $record_tag = "`$record_tag`";
 
-            $message = "$audit->user_action" . "$record_tag by " . $audit->user_full_name . " has been revoked by auditor (" . login()->user->full_name . ")";
+            $message = "$audit->user_action" . "$record_tag by " . $audit->user_full_name . " has been revoked by auditor (" . Util::login()->user->full_name . ")";
 
             if($audit->trail){
 
@@ -436,7 +437,7 @@ class Audit extends UserBaseModel
 
             static::report($collection,"Revoked",$revoked_action,$messages,"Auditor: ");
         }
-        else event("no.audit.trail");
+        else throw new ResponseException("no_audit_trail");
 
         return $revoked_action;
     }
@@ -530,7 +531,7 @@ class Audit extends UserBaseModel
 
             static::report($collection,"Restored",$revoked_action,$messages,"Auditor: ");
         }
-        else event("no.audit.trail");
+        else throw new ResponseException("no_audit_trail");
 
         return $revoked_action;
     }

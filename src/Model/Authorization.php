@@ -3,11 +3,11 @@
 namespace Ndexondeck\Lauditor\Model;
 
 use App\Ndexondeck\Lauditor\Util;
-use App\Task;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Ndexondeck\Lauditor\Exceptions\ResponseException;
 use Ndexondeck\Lauditor\Sql;
 
 class Authorization extends Audit
@@ -57,7 +57,7 @@ class Authorization extends Audit
             }
 
             if (empty(static::$auth_action)) {
-                event('missing.authorization.action');
+                throw new ResponseException('missing_authorization_action');
             }
             else{
 
@@ -102,17 +102,17 @@ class Authorization extends Audit
                     $currentModel =  $model->getOriginal();
 
                     if($currentModel['status'] == '2' or $currentModel['status'] == '3')
-                        event('authorize.access.denied');
+                        throw new ResponseException('access_denied');
 
                     if($model->status == "1" and $currentModel['status'] != "0")
-                        event('authorize.forwards.only.pending');
+                        throw new ResponseException('authorize_forwards_only_pending');
 
                     if($model->status == "2"){
-                        if($currentModel['status'] != "1") event('authorize.approves.only.forwarded');
+                        if($currentModel['status'] != "1") throw new ResponseException('authorize_approves_only_forwarded');
 
                         $pending_audits = $model->audits()->pending()->get();
 
-                        if($pending_audits->isEmpty()) event('empty.authorization.request');
+                        if($pending_audits->isEmpty()) throw new ResponseException('empty_authorization_request');
 
                         static::approving($currentModel['id']);
 
@@ -192,9 +192,9 @@ class Authorization extends Audit
                     }
 
                     if($model->status == "3"){
-                        if($currentModel['status'] != "1") event('authorize.rejects.only.forwarded');
+                        if($currentModel['status'] != "1") throw new ResponseException('authorize_rejects_only_forwarded');
 
-                        if(empty($model->comment) or empty($model->staff_id)) event('missing.authorize.rejection.data');
+                        if(empty($model->comment) or empty($model->staff_id)) throw new ResponseException('missing_authorize_rejection_data');
 
                         //we need to return all toggle states to its default
                         foreach($model->audits as $audit){
@@ -214,7 +214,7 @@ class Authorization extends Audit
             }
 
             if(empty(static::$auth_action)){
-                event("missing.authorization.action");
+                throw new ResponseException('missing_authorization_action');
             }
             else {
 
@@ -223,14 +223,14 @@ class Authorization extends Audit
                 $baseClass = class_basename($model);
 
                 $audit = new Audit();
-                $login = login();
+                $login = Util::login();
 
                 $audit->status = 3;
                 $audit->action = "update";
                 $audit->user_action = static::generateUserAction($audit->action,$baseClass);
                 $audit->trail_type = "App\\" . $baseClass;
                 $audit->trail_id = $model->id;
-                $audit->ip = getIp();
+                $audit->ip = Util::getIp();
                 $audit->rid = '';
                 $audit->dependency = json_encode(static::$auth_dependency);
                 $audit->before = static::exclusiveJsonAttributes($model->getOriginal());
@@ -256,7 +256,7 @@ class Authorization extends Audit
             if(static::isNotAllowed($model)) {
 
                 if(get_class($model) == self::class){
-                    if($model->status != "0") event("authorize.discards.only.pending");
+                    if($model->status != "0") throw new ResponseException('authorize_discards_only_pending');
 
                     //we need to return all toggle states to its default
                     foreach($model->audits as $audit){
@@ -275,7 +275,7 @@ class Authorization extends Audit
             }
 
             if(empty(static::$auth_action)){
-                event('missing.authorization.action');
+                throw new ResponseException('missing_authorization_action');
             }
             else{
 
@@ -284,14 +284,14 @@ class Authorization extends Audit
                 $baseClass = class_basename($model);
 
                 $audit = new Audit();
-                $login = login();
+                $login = Util::login();
 
                 $audit->status = 3;
                 $audit->action = "delete";
                 $audit->user_action = static::generateUserAction($audit->action,$baseClass);
                 $audit->trail_type = "App\\".$baseClass;
                 $audit->trail_id = $model->id;
-                $audit->ip = getIp();
+                $audit->ip = Util::getIp();;
                 $audit->rid =  '';
                 $audit->dependency = json_encode(static::$auth_dependency);
                 $audit->before = static::exclusiveJsonAttributes($model->getAttributes());
@@ -377,13 +377,13 @@ class Authorization extends Audit
                 'action'=>static::$auth_action,
                 'task_id'=> $task,
                 'rid'=>$rid,
-                'status'=>((Util::setting('authorization_direct_forwarding') == "yes")?'1':'0')
+                'status'=>((setting('direct_forwarding') == "yes")?'1':'0')
             ]);
         }
         else{
             if(!static::$auth_new){
-                if ($Authorization->status == '0') event('duplicate.auth.request');
-                elseif ($Authorization->status == '1') event('duplicate.forwarded.auth.request');
+                if ($Authorization->status == '0') throw new ResponseException('duplicate_auth_request');
+                elseif ($Authorization->status == '1') throw new ResponseException('duplicate_forwarded_auth_request');
             }
         }
 
@@ -413,11 +413,11 @@ class Authorization extends Audit
                 foreach ($v as $val) {
                     if ($val->authorization->status == '0'){
                         static::rollbackRequest();
-                        event('similar.auth.request');
+                        throw new ResponseException('similar_auth_request');
                     }
                     elseif ($val->authorization->status == '1'){
                         static::rollbackRequest();
-                        event('similar.forwarded.auth.request');
+                        throw new ResponseException('similar_forwarded_auth_request');
                     }
                 }
             }
@@ -432,7 +432,7 @@ class Authorization extends Audit
     }
 
     public static function setAuthAction($value){
-        static::$auth_action = normal_case($value);
+        static::$auth_action = Util::normalCase($value);
     }
 
     public static function setDependency(array $array)
@@ -460,125 +460,6 @@ class Authorization extends Audit
     {
         $baseClass = class_basename($model);
         return in_array($baseClass,static::$excluded) or static::$kill or static::$kill_auth or static::$prevent or static::$prevent_auth;
-    }
-
-    public static function getNotices(){
-        return [
-            '.me'=>[
-                'callback'=>function($login,$state){
-                    return static::me($login->id)->status($state)->afterNow()->get();
-                },
-                'keys'=>[
-                    'my_pending_authorization'=>0,
-                    'my_forwarded_authorization'=>1,
-                    'my_approved_authorization'=>2,
-                    'my_rejected_authorization'=>3
-                ],
-                'get_message'=>function($model,$key){
-                    switch($key){
-                        case "my_pending_authorization":
-                            return [
-                                'title'=>"Pending Authorization Request [$model->commit]",
-                                'message'=>"Your request to `".$model->action."` is yet to be forwarded"
-                            ];
-                        case "my_forwarded_authorization":
-                            return [
-                                'title'=>"Forwarded Authorization Request [$model->commit]",
-                                'message'=>"Your request to `".$model->action."` is yet to be approved"
-                            ];
-                        case "my_approved_authorization":
-                            return [
-                                'title'=>"Approved Authorization Request [$model->commit]",
-                                'message'=>"Your request to `".$model->action."` has been approved"
-                            ];
-                        case "my_rejected_authorization":
-                            return [
-                                'title'=>"Rejected Authorization Request [$model->commit]",
-                                'message'=>"Your request to `".$model->action."` has been rejected. Reason: `$model->comment`"
-                            ];
-                        default:
-                            return [
-                                'title'=>null,
-                                'message'=>null
-                            ];
-                    }
-                }
-            ],
-
-            '.index'=>[
-                'callback'=>function($login,$state){
-                    if(Login::isSysAdmin($login)) return static::status($state)->get();
-
-                    return static::permitted($login->user)->status($state)->get();
-                },
-                'keys'=>[
-                    'awaiting_approval'=>1
-                ],
-                'get_message'=>function($model){
-                    $i = $model->audits->count();
-                    $str = ($i > 1)?"records":"record";
-                    return [
-                        'title'=>"Awaiting Approval [$model->commit]",
-                        'message'=>"A user wants to `".$model->action."` ".$i." $str will be affected"
-                    ];
-                }
-            ],
-
-            '.all'=>[
-                'callback'=>function($login,$state){
-                    return static::status($state)->afterNow()->get();
-                },
-                'keys'=>[
-                    'all_pending_authorization'=>0,
-                    'all_forwarded_authorization'=>1,
-                    'all_approved_authorization'=>2,
-                    'all_rejected_authorization'=>3
-                ],
-                'get_message'=>function($model,$key){
-                    switch($key){
-                        case "all_pending_authorization":
-                            return [
-                                'title'=>"All Pending Authorization Request [$model->commit]",
-                                'message'=>"A request to `".$model->action."` is yet to be forwarded"
-                            ];
-                        case "all_forwarded_authorization":
-                            return [
-                                'title'=>"All Forwarded Authorization Request [$model->commit]",
-                                'message'=>"A request to `".$model->action."` is yet to be approved"
-                            ];
-                        case "all_approved_authorization":
-                            return [
-                                'title'=>"Approved Authorization Request [$model->commit]",
-                                'message'=>"A request to `".$model->action."` has been approved"
-                            ];
-                        case "all_rejected_authorization":
-                            return [
-                                'title'=>"Rejected Authorization Request [$model->commit]",
-                                'message'=>"A request to `".$model->action."` has been rejected. Reason: `$model->comment`"
-                            ];
-                        default:
-                            return [
-                                'title'=>null,
-                                'message'=>null
-                            ];
-                    }
-                }
-            ],
-
-        ];
-    }
-
-    public static function getStateColumn(){
-        return "status";
-    }
-
-    public static function getStateValueAlias($state){
-        return [
-            'pending'=>0,
-            'forwarded'=>1,
-            'approved'=>2,
-            'rejected'=>3,
-        ][$state];
     }
 
     protected static function rollbackRequest()
@@ -637,7 +518,7 @@ class Authorization extends Audit
 
     public function scopeMe($q,$login_id=null){
         $q->whereHas('audits',function($q) use ($login_id){
-            $q->where('login_id',($login_id)?$login_id:getLoginId());
+            $q->where('login_id',($login_id)?$login_id:Util::getLoginId());
         });
     }
 
