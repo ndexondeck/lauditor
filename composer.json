@@ -3,7 +3,7 @@
     "type": "library",
     "description": "Manages Auditing and Authorization",
     "keywords": ["audit", "authorize", "task generate"],
-    "license": "FREEWARE",
+    "license": "MIT",
 
     "authors": [
         {
