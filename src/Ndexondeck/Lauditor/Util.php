@@ -3,11 +3,19 @@
 //namespace App\Ndexondeck\Lauditor;
 
 use Carbon\Carbon;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Facades\Response;
 use Ndexondeck\Lauditor\Contracts\UtilContract;
 
 class Util implements UtilContract {
 
+    /**
+     * @param $array
+     * @param bool $reverse
+     * @param string $last_glue
+     * @return mixed|string
+     */
     public static function conjunct($array, $reverse=false, $last_glue = "and"){
         if(count($array) > 0){
             $array = array_values($array);
@@ -28,6 +36,10 @@ class Util implements UtilContract {
         }
     }
 
+    /**
+     * @param string $str
+     * @return string
+     */
     public static function normalCase($str){
 
         $str = preg_replace(['/(App\\\)+/','/(:|-|_|\(|\))/'],['',' $1 '],$str);
@@ -48,28 +60,48 @@ class Util implements UtilContract {
 
     }
 
-    public static function now($format='Y-m-d H:i:s',$signed_seconds=0){
+    /**
+     * @param string $format
+     * @param int $signed_seconds
+     * @return false|string
+     */
+    public static function now($format='Y-m-d H:i:s', $signed_seconds=0){
 
         return date($format,((time() + (env('TIME_OFFSET_HOURS',0) * 60)) + $signed_seconds));
 
     }
 
 
+    /**
+     * @param $format
+     * @param $time
+     * @return static
+     */
     public static function carbonFromFormat($format, $time){
         //
         return Carbon::createFromFormat(explode(".",$format)[0], explode(".",$time)[0]);
     }
 
+    /**
+     * @return mixed
+     */
     public static function getIp()
     {
         return Request::get('ip_address',Request::ip());
     }
 
+    /**
+     *
+     */
     public static function getLoginId()
     {
 
     }
 
+    /**
+     * @param $key
+     * @return mixed|void
+     */
     public static function setting($key)
     {
         //used keys
@@ -80,14 +112,50 @@ class Util implements UtilContract {
 
     }
 
+    /**
+     *
+     */
     public static function login()
     {
         //
     }
 
+    /**
+     * @return mixed
+     */
     public static function getPaginate()
     {
         return Request::get('paginate');
+    }
+
+    /**
+     * @param $data
+     * @param $code_name
+     * @return Response
+     */
+    public static function jsonFailure($data, $code_name)
+    {
+        return response()->app(false,$data,$code_name);
+    }
+
+    /**
+     * @param $data
+     * @return Response
+     */
+    public static function jsonSuccess($data)
+    {
+        return response()->app(true,$data,'success');
+    }
+
+    /**
+     * @param $result
+     * @param null $total
+     * @return array
+     */
+    public static function paginate($result, $total=null)
+    {
+        if(!$total)$total = count($result);
+        return (new LengthAwarePaginator($result,$total,static::getPaginate()))->toArray();
     }
 
 }
