@@ -9,15 +9,15 @@ class ActiveHour extends Authorization
     protected $fillable = ['name', 'begin_time', 'end_time'];
 
     public function audits(){
-        return $this->morphMany('App\Audit', 'trail');
+        return $this->morphMany('Ndexondeck\Lauditor\Model\Audit', 'trail');
     }
 
     public function staff() {
-        return $this->hasMany('App\Staff');
+        return $this->hasMany(Staff::class);
     }
 
     public function groups() {
-        return $this->hasMany('App\Group');
+        return $this->hasMany(Group::class);
     }
 
     public function scopeEnabled($q){

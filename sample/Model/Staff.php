@@ -52,23 +52,23 @@ class Staff extends Authorization implements User
 
     //eloquent
     public function login(){
-        return $this->morphOne('App\Login','user')->setEagerLoads([]);
+        return $this->morphOne(Login::class,'user')->setEagerLoads([]);
     }
 
     public function group(){
-        return $this->belongsTo('App\Group');
+        return $this->belongsTo(Group::class);
     }
 
     public function authorizations(){
-        return $this->hasMany('App\Authorization');
+        return $this->hasMany('Ndexondeck\Lauditor\Model\Authorization');
     }
 
     public function audits(){
-        return $this->morphMany('App\Audit', 'trail');
+        return $this->morphMany('Ndexondeck\Lauditor\Model\Audit', 'trail');
     }
 
     public function active_hour() {
-        return $this->belongsTo('App\ActiveHour');
+        return $this->belongsTo(ActiveHour::class);
     }
 
     public function scopeAuthorizers($q,$model){

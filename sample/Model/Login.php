@@ -5,7 +5,6 @@
 use App\Ndexondeck\Lauditor\Util;
 use Carbon\Carbon;
 use Ndexondeck\Lauditor\Model\Authorization;
-use Ndexondeck\Lauditor\Sql;
 
 class Login extends Authorization
 {
@@ -95,56 +94,6 @@ class Login extends Authorization
         return password_verify($password,$model->password);
     }
 
-    public static function getNotices(){
-        return [
-            '.change-password'=>[
-                'callback'=>function($login){
-                    return $login;
-                },
-                'keys'=>[
-                    'change_password_required'=>3
-                ],
-                'get_message'=>function(){
-                    return [
-                        'title'=>"Security Update",
-                        'message'=>"Password reset is required on your account"
-                    ];
-                }
-            ],
-            '.change-password-plain'=>[
-                'callback'=>function($login){
-                    return $login;
-                },
-                'keys'=>[
-                    'change_password_required'=>3
-                ],
-                'get_message'=>function(){
-                    return [
-                        'title'=>"Security Update",
-                        'message'=>"Password reset is required on your account"
-                    ];
-                }
-            ],
-        ];
-    }
-
-    public static function getStateColumn(){
-        return "status";
-    }
-
-    public static function getStateValueAlias($state){
-        return $state;
-    }
-
-    public static function globalSettings()
-    {
-        return [
-            'session_timeout'=>setting('session_idle_time'),
-            'direct_forwarding'=>setting('direct_forwarding'),
-            'default_currency'=>def_currency(true),
-            'ad'=>(setting('ad_service') == "yes"),
-        ];
-    }
 
     /**
      * @param $request
@@ -204,42 +153,25 @@ class Login extends Authorization
     }
 
     function trackers(){
-        return $this->hasMany('App\Tracker');
+        return $this->hasMany(Tracker::class);
     }
 
     function tracker(){
-        return $this->hasOne('App\Tracker')->latest();
-    }
-
-    function secret_question() {
-        return $this->hasOne('App\SecretQuestion');
+        return $this->hasOne(Tracker::class)->latest();
     }
 
     public function actions(){
-        return $this->hasMany('App\Audit', 'login_id');
+        return $this->hasMany('Ndexondeck\Lauditor\Model\Audit', 'login_id');
     }
 
     public function audits(){
-        return $this->morphMany('App\Audit', 'trail');
-    }
-
-    public function notifications(){
-        return $this->hasMany('App\Notification');
-    }
-
-    public function password_resets() {
-        return $this->hasMany('App\PasswordReset');
-    }
-
-    function scopeBranch($q,$branch_id){
-        $sql = new Sql();
-        $q->whereRaw($sql->escaped("(select count(*) from `staff` where `logins`.`user_type` = '".$sql->morph("App\\Staff")."' and `logins`.`user_id` = `staff`.`id` and `staff`.`branch_id` = $branch_id) >= 1"));
+        return $this->morphMany('Ndexondeck\Lauditor\Model\Audit', 'trail');
     }
 
     public function scopeUserExists($query)
     {
         return $query->where(function ($query) {
-                $query->where('user_type', 'App\Staff')->has('post');
+                $query->where('user_type', Staff::class)->has('post');
             });
     }
 
@@ -265,7 +197,8 @@ class Login extends Authorization
     }
 
     public function getUserTypeNameAttribute(){
-        return str_replace("App\\","",$this->attributes['user_type']);
+        $v = explode("\\",$this->attributes['user_type']);
+        return end($v);
     }
 
     public function getOpenSessionAttribute(){

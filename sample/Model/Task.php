@@ -28,23 +28,23 @@ class Task extends BaseModel
     }
 
     public function groups(){
-        return $this->belongsToMany('App\Group','permissions');
+        return $this->belongsToMany(Group::class,'permissions');
     }
 
     public function permissions(){
-        return $this->hasMany('App\Permission');
+        return $this->hasMany(Permission::class);
     }
 
     public function authorizers(){
-        return $this->hasMany('App\PermissionAuthorizer');
+        return $this->hasMany(PermissionAuthorizer::class);
     }
 
     public function module(){
-        return $this->belongsTo('App\Module');
+        return $this->belongsTo(Module::class);
     }
 
     public function parent_task(){
-        return $this->belongsTo('App\Task','parent_task_id');
+        return $this->belongsTo(Task::class,'parent_task_id');
     }
 
     public function scopeChildrenOf($q,$task_parent_id){

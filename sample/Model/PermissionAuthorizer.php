@@ -10,10 +10,10 @@ class PermissionAuthorizer extends Authorization
     protected $fillable = ['group_id','task_id'];
 
     public function task(){
-        return $this->belongsTo('App\Task');
+        return $this->belongsTo(Task::class);
     }
 
     public function group(){
-        return $this->belongsTo('App\Group');
+        return $this->belongsTo(Group::class);
     }
 }

@@ -3,7 +3,6 @@
 namespace Ndexondeck\Lauditor\Model;
 
 use App\Ndexondeck\Lauditor\Util;
-use App\Task;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -487,11 +486,13 @@ class Authorization extends Audit
     }
 
     public function task(){
-        return $this->belongsTo('App\Task');
+        $namespace = config('ndexondeck.lauditor.connection_map.'.$this->connection,'mysql');
+        return $this->belongsTo($namespace.'Task');
     }
 
     public function staff(){
-        return $this->belongsTo('App\Staff');
+        $namespace = config('ndexondeck.lauditor.connection_map.'.$this->connection,'mysql');
+        return $this->belongsTo($namespace.'Staff');
     }
 
     public function scopeStatus($q,$type){

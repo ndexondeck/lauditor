@@ -27,27 +27,27 @@ class Group extends Authorization
     }
 
     public function active_hour() {
-        return $this->belongsTo('App\ActiveHour');
+        return $this->belongsTo(ActiveHour::class);
     }
 
     public function permissions(){
-        return $this->hasMany('App\Permission');
+        return $this->hasMany(Permission::class);
     }
 
     public function tasks(){
-        return $this->belongstoMany('App\Task','permissions');
+        return $this->belongstoMany(Task::class,'permissions');
     }
 
     public function authorizers(){
-        return $this->hasMany('App\PermissionAuthorizer');
+        return $this->hasMany(PermissionAuthorizer::class);
     }
 
     public function authorizer_tasks(){
-        return $this->belongstoMany('App\Task','permission_authorizers');
+        return $this->belongstoMany(Task::class,'permission_authorizers');
     }
 
     public function staff(){
-        return $this->hasMany('App\Staff');
+        return $this->hasMany(Staff::class);
     }
 
     public function scopeEnabled($q){

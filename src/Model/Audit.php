@@ -561,11 +561,12 @@ class Audit extends BaseModel
     }
 
     public function authorization(){
-        return $this->belongsTo('App\Authorization');
+        return $this->belongsTo('Ndexondeck\Lauditor\Model\Authorization');
     }
 
     public function login(){
-        return $this->belongsTo('App\Login')->setEagerLoads([]);
+        $namespace = config('ndexondeck.lauditor.connection_map.'.$this->connection,'mysql');
+        return $this->belongsTo($namespace.'\Login')->setEagerLoads([]);
     }
 
     public function scopeCommitted($q){

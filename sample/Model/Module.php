@@ -9,11 +9,11 @@ class Module extends BaseModel
     public $timestamps = false;
 
     public function tasks(){
-        return $this->hasMany('App\Task');
+        return $this->hasMany(Task::class);
     }
 
     public function lazy_tasks(){
-        return $this->hasMany('App\Task')->setEagerLoads([]);
+        return $this->hasMany(Task::class)->setEagerLoads([]);
     }
 
 
