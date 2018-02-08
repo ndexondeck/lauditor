@@ -1,6 +1,8 @@
 <?php
 
-namespace App;
+//namespace App;
+
+use Ndexondeck\Lauditor\Model\Authorization;
 
 class ActiveHour extends Authorization
 {
