@@ -23,6 +23,7 @@ class LauditorServiceProvider extends ServiceProvider
         $publishedUtilities = __DIR__.'/Ndexondeck';
         $publishedControllerPath = __DIR__.'/../published_controllers';
         $routesPath = __DIR__.'/../routes.php';
+        $seederPath = __DIR__.'/../sample/LauditorSetupSeeder.php';
 
         if ($this->app->runningInConsole()) {
             $this->publishes([
@@ -31,6 +32,7 @@ class LauditorServiceProvider extends ServiceProvider
                 $publishedControllerPath => app_path('Http/Controllers'),
                 $publishedUtilities => app_path('Ndexondeck'),
                 $modelPath => app_path(''),
+                $seederPath => database_path('seeds/LauditorSetupSeeder.php'),
             ], 'ndexondeck-lauditor');
         }
 
