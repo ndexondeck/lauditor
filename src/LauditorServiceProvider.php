@@ -22,7 +22,7 @@ class LauditorServiceProvider extends ServiceProvider
         $publishedMigrationPath = __DIR__.'/../published_migrations';
         $publishedUtilities = __DIR__.'/Ndexondeck';
         $publishedControllerPath = __DIR__.'/../published_controllers';
-        $routesPath = __DIR__.'/../published_routes/routes.php';
+        $routesPath = __DIR__.'/../routes.php';
 
         if ($this->app->runningInConsole()) {
             $this->publishes([

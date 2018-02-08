@@ -31,8 +31,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "\\Ndexondeck\\Lauditor\\LauditorServiceProvider",
-                "\\Ndexondeck\\Lauditor\\ResponseServiceProvider"
+                "\\Ndexondeck\\Lauditor\\LauditorServiceProvider"
             ]
         }
     }

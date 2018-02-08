@@ -1,6 +1,6 @@
 <?php
 
-namespace Ndexondeck\Lauditor;
+//namespace App\Ndexondeck\Lauditor;
 
 use App\Task;
 use Illuminate\Database\QueryException;

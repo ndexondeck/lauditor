@@ -34,10 +34,10 @@ return [
         '.cycle'=>'day',
     ],
 
-
     'task-generator' => [
         'excluded_modules' => [],
-        'middleware_scopes' => ['task.permit'],
+        'middleware_scopes' => [],
+        'base_namespace' => ''
     ],
 
 //    'connections' => []

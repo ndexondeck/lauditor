@@ -96,6 +96,7 @@ class TaskGenerate extends Command
         $count = 0;
 
         $task_permit = config('ndexondeck.lauditor.task-generator.middleware_scopes',[]);
+        $base_namespace = config('ndexondeck.lauditor.task-generator.base_namespace','');
 
         foreach ($object as $value) {
 
@@ -121,18 +122,25 @@ class TaskGenerate extends Command
                 die($controller_name." does not exist. on line ". $e->getLine());
             }
 
-            $name = str_replace("App\\Http\\Controllers\\","",$controller_name);
-            $names = explode("\\",$name);
+            if(!empty(trim($base_namespace,"\\"))) $name = str_replace("App\\Http\\Controllers\\".trim($base_namespace,"\\")."\\","",$controller_name);
+            else $name = str_replace("App\\Http\\Controllers\\","",$controller_name);
 
-            if(in_array($names[0],static::$excluded_modules)) continue;
+            $names = explode("\\",$name);
+            $controller_name = $names[count($names) - 1];
+            unset($names[count($names) - 1]);
+
+            $mn = implode('-',$names);
+
+            if(in_array($mn,static::$excluded_modules)) continue;
 
             $module_name = $module_id = null;
             $i = 0;
-            if(count($names) > 1){
-                $exist = (array) DB::table('modules')->where('name',$names[0])->first();
+            if(count($names) > 0){
+
+                $exist = (array) DB::table('modules')->where('name',$mn)->first();
 
                 if(empty($exist)) {
-                    $module_name = $names[0];
+                    $module_name = $mn;
                     $module_id = DB::table('modules')->insertGetId([
                         'name'=> $module_name,
                         'description'=> $module_name." Module",
@@ -147,12 +155,12 @@ class TaskGenerate extends Command
                     $module_name = $exist['name'];
                 }
 
-                $names[0] = $names[1];
             }
+            else continue;
 
             $order = $task_order[$module_id];
 
-            $cname = str_replace("Controller","",$names[0]);
+            $cname = str_replace("Controller","",$controller_name);
             $controller_method = preg_replace($pattern,$replacement,$controller_method);
             $name = Util::normalCase($controller_method." ".$cname);
             $task_type = ($method == "PUT" or $method == "DELETE" or !empty($value->parameterNames()))?"1":"0";

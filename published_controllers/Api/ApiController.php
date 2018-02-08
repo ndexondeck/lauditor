@@ -2,14 +2,9 @@
 
 //namespace App\Http\Controllers\Api;
 
-use App\LogWebService;
-use App\Ndexondeck\Lauditor\Util;
-use Illuminate\Http\Request;
 
-use App\Http\Requests;
+use App\Ndexondeck\Lauditor\Util;
 use App\Http\Controllers\Controller;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Route;
 
 class ApiController extends Controller
@@ -28,6 +23,8 @@ class ApiController extends Controller
 
         $pattern = ["/destroy/", "/index/", "/store/", "/(^me)/"];
         $replacement = ["delete", "list", "create", "my"];
+
+        $base_namespace = config('ndexondeck.lauditor.task-generator.base_namespace','');
 
         $i = 1;
         $j = 0;
@@ -55,15 +52,22 @@ class ApiController extends Controller
                 die($controller_name." does not exist. on line ". $e->getLine());
             }
 
-            $name = str_replace("App\\Http\\Controllers\\", "", $controller_name);
-            $names = explode("\\", $name);
+            if(!empty(trim($base_namespace,"\\"))) $name = str_replace("App\\Http\\Controllers\\".trim($base_namespace,"\\")."\\","",$controller_name);
+            else $name = str_replace("App\\Http\\Controllers\\","",$controller_name);
 
-            if (count($names) > 1) {
+            $names = explode("\\",$name);
 
-                if (!isset($module[$names[0]])) {
+            $controller_name = $names[count($names) - 1];
+            unset($names[count($names) - 1]);
+
+            $mn = implode('-',$names);
+
+            if (count($names) > 0) {
+
+                if (!isset($module[$mn])) {
                     $i = 1;
                     echo "</table><br/><br/>
-                    <h3>$names[0] Module</h3>
+                    <h3>$mn Module</h3>
                     <table style='border: 1px solid #444' cellpadding='5'>
                             <tr>
                                   <th>S/N</th>
@@ -74,13 +78,12 @@ class ApiController extends Controller
                                   <th>Route</th>
                             </tr>";
 
-                    $module[$names[0]] = true;
+                    $module[$mn] = true;
                 }
-
-                $names[0] = $names[1];
             }
+            else continue;
 
-            $name = ucwords(preg_replace($pattern, $replacement, $controller_method) . " " . str_replace("Controller", "", $names[0]));
+            $name = ucwords(preg_replace($pattern, $replacement, $controller_method) . " " . str_replace("Controller", "", $controller_name));
 
             $color = is_int($i / 2) ? "#fff" : "#eee";
 
@@ -117,6 +120,8 @@ class ApiController extends Controller
         $pattern = ["/destroy/", "/index/", "/store/", "/(^me)/"];
         $replacement = ["delete", "list", "create", "my"];
 
+        $base_namespace = config('ndexondeck.lauditor.task-generator.base_namespace','');
+
         $i = 1;
         $j = 0;
         foreach ($object as $value) {
@@ -142,15 +147,22 @@ class ApiController extends Controller
                 die($controller_name." was not configured correctly: ". $e->getMessage() ." on line ". $e->getLine());
             }
 
-            $name = str_replace("App\\Http\\Controllers\\", "", $controller_name);
-            $names = explode("\\", $name);
+            if(!empty(trim($base_namespace,"\\"))) $name = str_replace("App\\Http\\Controllers\\".trim($base_namespace,"\\")."\\","",$controller_name);
+            else $name = str_replace("App\\Http\\Controllers\\","",$controller_name);
 
-            if (count($names) > 1) {
+            $names = explode("\\",$name);
 
-                if (!isset($module[$names[0]])) {
+            $controller_name = $names[count($names) - 1];
+            unset($names[count($names) - 1]);
+
+            $mn = implode('-',$names);
+
+            if (count($names) > 0) {
+
+                if (!isset($module[$mn])) {
                     $i = 1;
                     echo "</table><br/><br/>
-                    <h3>$names[0] Module</h3>
+                    <h3>$mn Module</h3>
                     <table style='border: 1px solid #444' cellpadding='5'>
                             <tr>
                                   <th>S/N</th>
@@ -158,13 +170,12 @@ class ApiController extends Controller
                                   <th>HTTP Method</th>
                                   <th>Task</th>
                             </tr>";
-                    $module[$names[0]] = true;
+                    $module[$mn] = true;
                 }
-
-                $names[0] = $names[1];
             }
+            else continue;
 
-            $name = ucwords(preg_replace($pattern, $replacement, $controller_method) . " " . str_replace("Controller", "", $names[0]));
+            $name = ucwords(preg_replace($pattern, $replacement, $controller_method) . " " . str_replace("Controller", "", $controller_name));
 
             $color = is_int($i / 2) ? "#fff" : "#eee";
 
