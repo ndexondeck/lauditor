@@ -158,7 +158,7 @@ class Audit extends BaseModel
             $audit->after = static::exclusiveJsonAttributes($model->getAttributes());
             $audit->table_name = $model->getTable();
             $audit->rid = static::makeRid();
-            $audit->trail_type = "App\\".$baseClass;
+            $audit->trail_type = get_class($model);
             $audit->trail_id = $model->id;
             $audit->save();
 
@@ -193,7 +193,7 @@ class Audit extends BaseModel
             $audit->after = static::exclusiveJsonAttributes($model->getAttributes());
             $audit->table_name = $model->getTable();
             $audit->rid = static::makeRid();
-            $audit->trail_type = "App\\".$baseClass;
+            $audit->trail_type = get_class($model);
             $audit->trail_id = $model->id;
             $audit->save();
 
@@ -229,7 +229,7 @@ class Audit extends BaseModel
             $audit->table_name = $model->getTable();
             $audit->rid = static::makeRid();
             $audit->trail_id = $model->id;
-            $audit->trail_type = "App\\".$baseClass;
+            $audit->trail_type = get_class($model);
             $audit->login_id = Util::getLoginId();
             $audit->save();
         });
@@ -293,15 +293,21 @@ class Audit extends BaseModel
                 'status'=>2,
                 'login_id'=>Util::getLoginId(),
                 'table_name'=>'audits',
-                'trail_type'=>'App\Audit',
+                'trail_type'=>get_class($audit),
                 'trail_id'=>$audit->id,
                 'created_at'=> $now,
                 'updated_at'=> $now
             ];
         }
-        if(!empty($logs)) DB::table('audits')->insert($logs);
 
-        $Group = Group::with('users')->where('name','like','administrator%')->first();
+        $connection = $audit->getConnectionName();
+
+        if(!empty($logs)) DB::connection($connection)->table('audits')->insert($logs);
+
+        $namespace = config('ndexondeck.lauditor.connection_map.'.$connection,'mysql');
+        $group_class =  $namespace.'\Group';
+
+        $Group = (new $group_class())->with('users')->where('name','like','administrator%')->first();
 
         if($Group and $Group->users)
 
@@ -309,14 +315,14 @@ class Audit extends BaseModel
 
     }
 
-    public static function getValue($key,$value){
+    public static function getValue($connection,$key,$value){
         static::$transformer = config('ndexondeck.lauditor.transformer');
 
         if(!isset(static::$transformer[$key])) return $value;
 
         $transform = explode(":",static::$transformer[$key]);
 
-        return DB::table($transform[0])->where($transform[2],$value)->pluck($transform[1]);
+        return DB::connection($connection)->table($transform[0])->where($transform[2],$value)->pluck($transform[1]);
     }
 
     public static function setAnonymity($value){
@@ -354,9 +360,11 @@ class Audit extends BaseModel
 
         foreach ($collection as $audit) {
 
+            $connection = $audit->getConnectionName();
+
             $record_tags = [];
 
-            $type = str_replace('App\\', '', $audit->trail_type);
+            $type = $audit->audit_type;
 
             $record_label = $record = json_decode($audit->before,true);
 
@@ -382,7 +390,7 @@ class Audit extends BaseModel
                 switch ($audit->action) {
 
                     case "create":
-                        DB::table($audit->table_name)->where('id', $audit->trail_id)->delete();
+                        DB::connection($connection)->table($audit->table_name)->where('id', $audit->trail_id)->delete();
                         $message .= ", $type has been moved to the trash";
                         break;
 
@@ -390,7 +398,7 @@ class Audit extends BaseModel
                         foreach($record as $k=>$v){
                             if(!is_string($v) and !is_null($v)) $record[$k] = json_encode($v);
                         }
-                        DB::table($audit->table_name)->where('id', $audit->trail_id)->update($record);
+                        DB::connection($connection)->table($audit->table_name)->where('id', $audit->trail_id)->update($record);
                         $current = json_decode($audit->after,true);
                         foreach($current as $k=>$v){
                             if(!is_string($v) and !is_null($v)) $current[$k] = json_encode($v);
@@ -422,7 +430,7 @@ class Audit extends BaseModel
                 foreach($record as $k=>$v){
                     if(!is_string($v) and !is_null($v)) $record[$k] = json_encode($v);
                 }
-                DB::table($audit->table_name)->insert($record);
+                DB::connection($connection)->table($audit->table_name)->insert($record);
                 $message .= ", $type has been restored";
 
                 $messages[] = $message;
@@ -448,9 +456,11 @@ class Audit extends BaseModel
 
         foreach ($collection as $audit) {
 
+            $connection = $audit->getConnectionName();
+
             $record_tags = [];
 
-            $type = str_replace('App\\', '', $audit->trail_type);
+            $type = $audit->audit_type;
 
             $record_label = $current = json_decode($audit->after,true);
 
@@ -476,7 +486,7 @@ class Audit extends BaseModel
                 switch ($audit->action) {
 
                     case "delete":
-                        DB::table($audit->table_name)->where('id', $audit->trail_id)->delete();
+                        DB::connection($connection)->table($audit->table_name)->where('id', $audit->trail_id)->delete();
                         $message .= ", $type has been moved to the trash";
                         break;
 
@@ -484,7 +494,7 @@ class Audit extends BaseModel
                         foreach($current as $k=>$v){
                             if(!is_string($v) and !is_null($v)) $current[$k] = json_encode($v);
                         }
-                        DB::table($audit->table_name)->where('id', $audit->trail_id)->update($current);
+                        DB::connection($connection)->table($audit->table_name)->where('id', $audit->trail_id)->update($current);
                         $record = json_decode($audit->before,true);
                         foreach($record as $k=>$v){
                             if(!is_string($v) and !is_null($v)) $record[$k] = json_encode($v);
@@ -516,7 +526,7 @@ class Audit extends BaseModel
                 foreach($current as $k=>$v){
                     if(!is_string($v) and !is_null($v)) $current[$k] = json_encode($v);
                 }
-                DB::table($audit->table_name)->insert($current);
+                DB::connection($connection)->table($audit->table_name)->insert($current);
                 $message .= ", $type has been re-added";
 
                 $messages[] = $message;
@@ -610,7 +620,8 @@ class Audit extends BaseModel
 
     public function getAuditTypeAttribute(){
 
-        return str_replace('App\\','',$this->trail_type);
+        $v = explode("\\",$this->attributes['trail_type']);
+        return end($v);
     }
 
     public function getCommitAttribute(){

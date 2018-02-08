@@ -49,6 +49,8 @@ class Authorization extends Audit
 
         static::creating(function($model) {
 
+            $connection = $model->getConnectionName();
+
             if (static::$approving) return;
 
             if (static::isNotAllowed($model)){
@@ -61,7 +63,7 @@ class Authorization extends Audit
             }
             else{
 
-                $Authorization = self::getAuth($model->getConnectionName());
+                $Authorization = self::getAuth($connection);
 
                 $baseClass = class_basename($model);
 
@@ -92,6 +94,8 @@ class Authorization extends Audit
         });
 
         static::updating(function($model){
+
+            $connection = $model->getConnectionName();
 
             if(static::$approving) return;
 
@@ -200,8 +204,8 @@ class Authorization extends Audit
                         foreach($model->audits as $audit){
                             if(!$audit->trail) continue;
 
-                            if($audit->trail->enabled == '2') DB::table($audit->table_name)->where('id',$audit->trail->id)->update(['enabled'=>1]);
-                            elseif($audit->trail->enabled == '3') DB::table($audit->table_name)->where('id',$audit->trail->id)->update(['enabled'=>0]);
+                            if($audit->trail->enabled == '2') DB::connection($connection)->table($audit->table_name)->where('id',$audit->trail->id)->update(['enabled'=>1]);
+                            elseif($audit->trail->enabled == '3') DB::connection($connection)->table($audit->table_name)->where('id',$audit->trail->id)->update(['enabled'=>0]);
                         }
 
                     }
@@ -218,7 +222,7 @@ class Authorization extends Audit
             }
             else {
 
-                $Authorization = self::getAuth($model->getConnectionName());
+                $Authorization = self::getAuth($connection);
 
                 $baseClass = class_basename($model);
 
@@ -251,6 +255,8 @@ class Authorization extends Audit
 
         static::deleting(function($model){
 
+            $connection = $model->getConnectionName();
+
             if(static::$approving) return;
 
             if(static::isNotAllowed($model)) {
@@ -262,8 +268,8 @@ class Authorization extends Audit
                     foreach($model->audits as $audit){
                         if(!$audit->trail) continue;
 
-                        if($audit->trail->enabled == '2') DB::table($audit->table_name)->where('id',$audit->trail->id)->update(['enabled'=>1]);
-                        elseif($audit->trail->enabled == '3') DB::table($audit->table_name)->where('id',$audit->trail->id)->update(['enabled'=>0]);
+                        if($audit->trail->enabled == '2') DB::connection($connection)->table($audit->table_name)->where('id',$audit->trail->id)->update(['enabled'=>1]);
+                        elseif($audit->trail->enabled == '3') DB::connection($connection)->table($audit->table_name)->where('id',$audit->trail->id)->update(['enabled'=>0]);
                     }
 
                     $model->audits()->delete();
@@ -279,7 +285,7 @@ class Authorization extends Audit
             }
             else{
 
-                $Authorization = self::getAuth($model->getConnectionName());
+                $Authorization = self::getAuth($connection);
 
                 $baseClass = class_basename($model);
 
@@ -396,7 +402,7 @@ class Authorization extends Audit
         return $Authorization;
     }
 
-    protected static function checkDuplicate($audit){
+    protected static function checkDuplicate(Model $audit){
 
         if($audit->dependency == "null"){
 
@@ -417,11 +423,11 @@ class Authorization extends Audit
             if (!$v->isEmpty()) {
                 foreach ($v as $val) {
                     if ($val->authorization->status == '0'){
-                        static::rollbackRequest();
+                        static::rollbackRequest($audit->getConnectionName());
                         throw new ResponseException('similar_auth_request');
                     }
                     elseif ($val->authorization->status == '1'){
-                        static::rollbackRequest();
+                        static::rollbackRequest($audit->getConnectionName());
                         throw new ResponseException('similar_forwarded_auth_request');
                     }
                 }
@@ -467,12 +473,12 @@ class Authorization extends Audit
         return in_array($baseClass,static::$excluded) or static::$kill or static::$kill_auth or static::$prevent or static::$prevent_auth;
     }
 
-    protected static function rollbackRequest()
+    protected static function rollbackRequest($connection)
     {
         if(static::$auth_id){
             if(static::$auth_new){
-                DB::table('audits')->where('authorization_id',static::$auth_id)->delete();
-                DB::table('authorizations')->where('id',static::$auth_id)->delete();
+                DB::connection($connection)->table('audits')->where('authorization_id',static::$auth_id)->delete();
+                DB::connection($connection)->table('authorizations')->where('id',static::$auth_id)->delete();
             }
         }
     }
