@@ -141,7 +141,7 @@ class Audit extends BaseModel
                 $audit->task_route = static::getTempAudit('task_route');
             }
             else{
-                $login = Util::login();
+                $login = Util::login($model->getConnectionName());
                 $audit->login_id = $login->id;
                 $audit->ip = Util::getIp();
                 $audit->user_name = $login->user->fullname." ($login->user_type_name)";
@@ -177,7 +177,7 @@ class Audit extends BaseModel
                 $audit->task_route = static::getTempAudit('task_route');
             }
             else{
-                $login = Util::login();
+                $login = Util::login($model->getConnectionName());
                 $audit->login_id = $login->id;
                 $audit->ip = Util::getIp();
                 $audit->user_name = $login->user->fullname." ($login->user_type_name)";
@@ -212,7 +212,7 @@ class Audit extends BaseModel
                 $audit->task_route = static::getTempAudit('task_route');
             }
             else{
-                $login = Util::login();
+                $login = Util::login($model->getConnectionName());
                 $audit->login_id = $login->id;
                 $audit->ip = Util::getIp();
                 $audit->user_name = $login->user->fullname." ($login->user_type_name)";
@@ -304,7 +304,7 @@ class Audit extends BaseModel
 
         if(!empty($logs)) DB::connection($connection)->table('audits')->insert($logs);
 
-        $namespace = config('ndexondeck.lauditor.connection_map.'.$connection,'mysql');
+        $namespace = config('ndexondeck.lauditor.connection_map.'.$connection,'App');
         $group_class =  $namespace.'\Group';
 
         $Group = (new $group_class())->with('users')->where('name','like','administrator%')->first();
@@ -575,7 +575,7 @@ class Audit extends BaseModel
     }
 
     public function login(){
-        $namespace = config('ndexondeck.lauditor.connection_map.'.$this->connection,'mysql');
+        $namespace = config('ndexondeck.lauditor.connection_map.'.$this->connection,'App');
         return $this->belongsTo($namespace.'\Login')->setEagerLoads([]);
     }
 

@@ -492,12 +492,12 @@ class Authorization extends Audit
     }
 
     public function task(){
-        $namespace = config('ndexondeck.lauditor.connection_map.'.$this->connection,'mysql');
+        $namespace = config('ndexondeck.lauditor.connection_map.'.$this->connection,'App');
         return $this->belongsTo($namespace.'Task');
     }
 
     public function staff(){
-        $namespace = config('ndexondeck.lauditor.connection_map.'.$this->connection,'mysql');
+        $namespace = config('ndexondeck.lauditor.connection_map.'.$this->connection,'App');
         return $this->belongsTo($namespace.'Staff');
     }
 

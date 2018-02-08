@@ -130,15 +130,19 @@ class Util implements UtilContract {
     }
 
     /**
-     *
+     * @param null $connection
+     * @return \App\Login
      */
-    public static function login()
+    public static function login($connection=null)
     {
         //
 
         if($login = Request::get('login')) return $login;
 
-        return App\Login::findOrFail(static::getLoginId());
+        $namespace = config('ndexondeck.lauditor.connection_map.'.$connection,'App');
+        $login_class =  $namespace.'\Login';
+
+        return (new $login_class())->findOrFail(static::getLoginId());
     }
 
     /**

@@ -59,9 +59,10 @@ Interface UtilContract{
 
     /**
      * returns the Login object
+     * @param null $connection
      * @return \App\Login
      */
-    public static function login();
+    public static function login($connection=null);
 
     /**
      * @return mixed
