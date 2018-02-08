@@ -13,7 +13,13 @@ class DatabaseFlush extends Command
      *
      * @var string
      */
-    protected $signature = 'db:flush {--truncate} {--keep-tasks} {--no-backup} {--backup-only} {--mode=} {--skip=}';
+    protected $signature = 'db:flush {--truncate : Drops all tables on the affected DB} 
+    {--keep-tasks : Flush without deleting the tasks} 
+    {--no-backup : Skip database backup} 
+    {--backup-only : Create backup only} 
+    {--mode= : Run in `sqlsrv` mode or `mysql`(default) mode} 
+    {--skip= : Tables to skip in csv e.g users,admins} 
+    {--connections= : Specify connections in csv}';
 
     /**
      * The console command description.
@@ -62,7 +68,13 @@ class DatabaseFlush extends Command
 
         $migrations = array_values($migrations);
 
-        if($db_connections = config('ndexondeck.lauditor.connections') and !empty($db_connections)){
+        if($cs = $this->option('connections')){
+
+            foreach (explode(',',$cs) as $db_connection){
+                $connections[] = (new Sql())->connection($db_connection);
+            }
+        }
+        elseif($db_connections = config('ndexondeck.lauditor.connections') and !empty($db_connections)){
             foreach ($db_connections as $db_connection){
                 $connections[] = (new Sql())->connection($db_connection);
             }

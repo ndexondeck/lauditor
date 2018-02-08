@@ -3,6 +3,7 @@
 namespace Ndexondeck\Lauditor\Model;
 
 use App\Ndexondeck\Lauditor\Util;
+use App\Task;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -61,7 +62,7 @@ class Authorization extends Audit
             }
             else{
 
-                $Authorization = self::getAuth();
+                $Authorization = self::getAuth($model->getConnectionName());
 
                 $baseClass = class_basename($model);
 
@@ -218,7 +219,7 @@ class Authorization extends Audit
             }
             else {
 
-                $Authorization = self::getAuth();
+                $Authorization = self::getAuth($model->getConnectionName());
 
                 $baseClass = class_basename($model);
 
@@ -279,7 +280,7 @@ class Authorization extends Audit
             }
             else{
 
-                $Authorization = self::getAuth();
+                $Authorization = self::getAuth($model->getConnectionName());
 
                 $baseClass = class_basename($model);
 
@@ -358,7 +359,12 @@ class Authorization extends Audit
         return $record;
     }
 
-    protected static function getAuth()
+    /**
+     * @param $connection
+     * @return Authorization
+     * @throws ResponseException
+     */
+    protected static function getAuth($connection)
     {
         $rid = static::makeRid();
 
@@ -369,7 +375,7 @@ class Authorization extends Audit
 
             static::$auth_new = true;
 
-            $task = Task::whereRoute(Route::currentRouteName())->first();
+            $task = DB::connection($connection)->where('route',Route::currentRouteName())->first();
 
             if($task) $task = $task->id;
 
@@ -377,7 +383,7 @@ class Authorization extends Audit
                 'action'=>static::$auth_action,
                 'task_id'=> $task,
                 'rid'=>$rid,
-                'status'=>((setting('direct_forwarding') == "yes")?'1':'0')
+                'status'=>((Util::setting('authorization_direct_forwarding') == "yes")?'1':'0')
             ]);
         }
         else{

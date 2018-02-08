@@ -16,7 +16,7 @@ class TaskGenerate extends Command
      *
      * @var string
      */
-    protected $signature = 'task:generate';
+    protected $signature = 'task:generate {--connection= : Specify a connections} {--namespace=}';
 
     /**
      * The console command description.
@@ -46,23 +46,23 @@ class TaskGenerate extends Command
     public function handle()
     {
         //
-        $task_list = DB::table('tasks')->pluck('route','id');
+        $task_list = DB::connection($this->option('connection'))->table('tasks')->pluck('route','id');
 
-        $auth_task_list = DB::table('authorizations')->whereNotNull('task_id')->pluck('task_id','id');
+        $auth_task_list = DB::connection($this->option('connection'))->table('authorizations')->whereNotNull('task_id')->pluck('task_id','id');
         if(!empty($auth_task_list))
-            DB::table('authorizations')->whereNotNull('task_id')->update(['task_id'=>null]);
+            DB::connection($this->option('connection'))->table('authorizations')->whereNotNull('task_id')->update(['task_id'=>null]);
 
         $sql = new Sql();
-        DB::statement($sql->disableChecks);
+        DB::connection($this->option('connection'))->statement($sql->disableChecks);
 
-        $perm_task_list = DB::table('permissions')->select('id','group_id','task_id')->get();
+        $perm_task_list = DB::connection($this->option('connection'))->table('permissions')->select('id','group_id','task_id')->get();
         if(!empty($perm_task_list)){
-            DB::statement('TRUNCATE TABLE permissions');
+            DB::connection($this->option('connection'))->statement('TRUNCATE TABLE permissions');
         }
 
-        $perm_auth_task_list = DB::table('permission_authorizers')->select('id','group_id','task_id')->get();
+        $perm_auth_task_list = DB::connection($this->option('connection'))->table('permission_authorizers')->select('id','group_id','task_id')->get();
         if(!empty($perm_auth_task_list)){
-            DB::statement('TRUNCATE TABLE permission_authorizers');
+            DB::connection($this->option('connection'))->statement('TRUNCATE TABLE permission_authorizers');
         }
 
         //Lets cache these values incase a failure occurs
@@ -78,13 +78,13 @@ class TaskGenerate extends Command
         if(Cache::get('temp.perm_auth_task_list')) $perm_auth_task_list = Cache::get('temp.perm_auth_task_list');
         else Cache::forever('temp.perm_auth_task_list',$perm_auth_task_list);
 
-        DB::table('tasks')->delete();
+        DB::connection($this->option('connection'))->table('tasks')->delete();
         $sql->resetAutoIncrement("tasks");
 
-        DB::table('modules')->delete();
+        DB::connection($this->option('connection'))->table('modules')->delete();
         $sql->resetAutoIncrement("modules");
 
-        DB::statement($sql->enableChecks);
+        DB::connection($this->option('connection'))->statement($sql->enableChecks);
 
         $object=Route::getRoutes();
 
@@ -110,6 +110,8 @@ class TaskGenerate extends Command
             if(!$method == "PATCH") continue;
 
             $controller = explode("@",$value->getActionName());
+
+            if(!isset($controller[1])) continue;
 
             $controller_name = $controller[0];
             $controller_method = $controller[1];
@@ -137,11 +139,11 @@ class TaskGenerate extends Command
             $i = 0;
             if(count($names) > 0){
 
-                $exist = (array) DB::table('modules')->where('name',$mn)->first();
+                $exist = (array) DB::connection($this->option('connection'))->table('modules')->where('name',$mn)->first();
 
                 if(empty($exist)) {
                     $module_name = $mn;
-                    $module_id = DB::table('modules')->insertGetId([
+                    $module_id = DB::connection($this->option('connection'))->table('modules')->insertGetId([
                         'name'=> $module_name,
                         'description'=> $module_name." Module",
                         'visibility'=>'1',
@@ -165,7 +167,7 @@ class TaskGenerate extends Command
             $name = Util::normalCase($controller_method." ".$cname);
             $task_type = ($method == "PUT" or $method == "DELETE" or !empty($value->parameterNames()))?"1":"0";
 
-            $task_id = DB::table('tasks')->insertGetId(
+            $task_id = DB::connection($this->option('connection'))->table('tasks')->insertGetId(
                 [
                     'module_id' => $module_id,
                     'route' => $route,
@@ -188,19 +190,19 @@ class TaskGenerate extends Command
         }
 
         foreach($parent_task as $k=>$id){
-            DB::table('tasks')->where('route','like',$k."%")->where('id','<>',$id)->update(['parent_task_id'=>$id]);
+            DB::connection($this->option('connection'))->table('tasks')->where('route','like',$k."%")->where('id','<>',$id)->update(['parent_task_id'=>$id]);
         }
 
         print "\n";
 
-        $new_task_list = DB::table('tasks')->pluck('id','route');
+        $new_task_list = DB::connection($this->option('connection'))->table('tasks')->pluck('id','route');
 
         if(!empty($auth_task_list)){
             print "Remapping ".(count($auth_task_list))." authorization task(s)";
 
             foreach($auth_task_list as $id=>$task_id){
                 if(isset($task_list[$task_id]) and isset($new_task_list[$task_list[$task_id]]))
-                    DB::table('authorizations')->where('id',$id)->update(['task_id'=>$new_task_list[$task_list[$task_id]]]);
+                    DB::connection($this->option('connection'))->table('authorizations')->where('id',$id)->update(['task_id'=>$new_task_list[$task_list[$task_id]]]);
             }
             Cache::forget('temp.auth_task_list');
         }
@@ -215,7 +217,7 @@ class TaskGenerate extends Command
                     $data[] = ['group_id'=>$row->group_id,'task_id'=>$new_task_list[$task_list[$row->task_id]],'created_at'=>now(),'updated_at'=>now()];
             }
 
-            DB::table('permissions')->insert($data);
+            DB::connection($this->option('connection'))->table('permissions')->insert($data);
             Cache::forget('temp.perm_task_list');
         }
 
@@ -229,7 +231,7 @@ class TaskGenerate extends Command
                     $data[] = ['group_id'=>$row->group_id,'task_id'=>$new_task_list[$task_list[$row->task_id]],'created_at'=>now(),'updated_at'=>now()];
             }
 
-            DB::table('permission_authorizers')->insert($data);
+            DB::connection($this->option('connection'))->table('permission_authorizers')->insert($data);
             Cache::forget('temp.perm_auth_task_list');
         }
 

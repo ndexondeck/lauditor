@@ -41,6 +41,8 @@ class ApiController extends Controller
 
             $controller = explode("@", $value->getActionName());
 
+            if(!isset($controller[1])) continue;
+
             $controller_name = $controller[0];
             $controller_method = $controller[1];
 
@@ -135,6 +137,8 @@ class ApiController extends Controller
                 continue;
 
             $controller = explode("@", $value->getActionName());
+
+            if(!isset($controller[1])) continue;
 
             $controller_name = $controller[0];
             $controller_method = $controller[1];
