@@ -16,7 +16,9 @@ class TaskGenerate extends Command
      *
      * @var string
      */
-    protected $signature = 'task:generate {--connection= : Specify a connections} {--namespace=}';
+    protected $signature = 'task:generate {--connection= : Specify a connections} 
+    {--namespace= : Specify a namespace to match from App\Http\Controllers}
+    {--base_namespace= : Specify base namespace to controller root}';
 
     /**
      * The console command description.
@@ -96,7 +98,12 @@ class TaskGenerate extends Command
         $count = 0;
 
         $task_permit = config('ndexondeck.lauditor.task-generator.middleware_scopes',[]);
-        $base_namespace = config('ndexondeck.lauditor.task-generator.base_namespace','');
+
+        if(!$base_namespace = $this->option('base_namespace')){
+            $base_namespace = config('ndexondeck.lauditor.task-generator.base_namespace','');
+        }
+
+        $namespace = $this->option('namespace');
 
         foreach ($object as $value) {
 
@@ -122,6 +129,17 @@ class TaskGenerate extends Command
             }
             catch(\Exception $e){
                 die($controller_name." does not exist. on line ". $e->getLine());
+            }
+
+            if(!empty($namespaces)){
+                $allowed = false;
+                foreach ($namespaces as $namespace){
+                    if(strstr($controller_name,"App\\Http\\Controllers\\".$namespace)){
+                        $allowed = true;
+                        break;
+                    }
+                }
+                if(!$allowed) continue;
             }
 
             if(!empty(trim($base_namespace,"\\"))) $name = str_replace("App\\Http\\Controllers\\".trim($base_namespace,"\\")."\\","",$controller_name);
