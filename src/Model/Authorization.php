@@ -375,7 +375,7 @@ class Authorization extends Audit
 
             static::$auth_new = true;
 
-            $task = DB::connection($connection)->where('route',Route::currentRouteName())->first();
+            $task = DB::connection($connection)->table('tasks')->where('route',Route::currentRouteName())->first();
 
             if($task) $task = $task->id;
 

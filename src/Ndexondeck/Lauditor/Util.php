@@ -7,6 +7,8 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Response;
 use Ndexondeck\Lauditor\Contracts\UtilContract;
+use Ndexondeck\Lauditor\Exceptions\ResponseException;
+use Ndexondeck\Lauditor\Model\Audit;
 
 class Util implements UtilContract {
 
@@ -95,12 +97,18 @@ class Util implements UtilContract {
      */
     public static function getLoginId()
     {
+        //return the login id of the current logged in user
+        $login_id = false;
 
+        if(!$login_id){
+            if(Audit::isAnonymous()) return Audit::getAnonymity();
+            throw new ResponseException('no_auth');
+        }
     }
 
     /**
      * @param $key
-     * @return mixed|void
+     * @return mixed
      */
     public static function setting($key)
     {
@@ -110,6 +118,15 @@ class Util implements UtilContract {
         //pw_cyc_threshold [integer]
         //dormant_period [integer] in days
 
+        $array = [
+            'authorization_direct_forwarding' => 'yes',
+            'max_log_retry' => 5,
+            'pw_cyc_threshold' => 3000,
+            'dormant_period' => 300
+        ];
+
+        return (!empty($array[$key]))? $array[$key]: null;
+
     }
 
     /**
@@ -118,6 +135,10 @@ class Util implements UtilContract {
     public static function login()
     {
         //
+
+        if($login = Request::get('login')) return $login;
+
+        return App\Login::findOrFail(static::getLoginId());
     }
 
     /**
