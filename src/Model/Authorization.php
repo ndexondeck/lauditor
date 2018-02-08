@@ -68,7 +68,7 @@ class Authorization extends Audit
                 $baseClass = class_basename($model);
 
                 $audit = new Audit();
-                $login = Util::login();
+                $login = Util::login($connection);
 
                 $audit->status = 3;
                 $audit->action = "create";
@@ -227,7 +227,7 @@ class Authorization extends Audit
                 $baseClass = class_basename($model);
 
                 $audit = new Audit();
-                $login = Util::login();
+                $login = Util::login($connection);
 
                 $audit->status = 3;
                 $audit->action = "update";
@@ -290,7 +290,7 @@ class Authorization extends Audit
                 $baseClass = class_basename($model);
 
                 $audit = new Audit();
-                $login = Util::login();
+                $login = Util::login($connection);
 
                 $audit->status = 3;
                 $audit->action = "delete";

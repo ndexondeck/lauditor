@@ -381,7 +381,7 @@ class Audit extends BaseModel
             if($record_tag == "" or strstr($audit->user_action,$record_tag))$record_tag = "";
             else $record_tag = "`$record_tag`";
 
-            $message = "$audit->user_action" . "$record_tag by " . $audit->user_full_name . " has been revoked by auditor (" . Util::login()->user->full_name . ")";
+            $message = "$audit->user_action" . "$record_tag by " . $audit->user_full_name . " has been revoked by auditor (" . Util::login($connection)->user->full_name . ")";
 
             if($audit->trail){
 
