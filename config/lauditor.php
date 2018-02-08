@@ -42,8 +42,5 @@ return [
 
 //    'connections' => []
 
-//    'response' => 'app'
-
-
 
 ];
