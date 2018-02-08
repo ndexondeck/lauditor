@@ -103,7 +103,9 @@ class TaskGenerate extends Command
             $base_namespace = config('ndexondeck.lauditor.task-generator.base_namespace','');
         }
 
-        $namespace = $this->option('namespace');
+        if($namespaces = $this->option('namespace')){
+            $namespaces = explode(',',$namespaces);
+        }
 
         foreach ($object as $value) {
 
