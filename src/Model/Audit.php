@@ -312,8 +312,9 @@ class Audit extends BaseModel
 
         if(!empty($logs)) DB::connection($connection)->table('audits')->insert($logs);
 
-        $namespace = config('ndexondeck.lauditor.connection_map.'.$connection,'App');
-        $group_class =  $namespace.'\Group';
+        $connection = $connection ? : "mysql";
+        $namespace = config('ndexondeck.lauditor.connection_map.'.$connection,'App\\');
+        $group_class =  $namespace.'Group';
 
         $Group = (new $group_class())->with('users')->where('name','like','administrator%')->first();
 
@@ -583,8 +584,9 @@ class Audit extends BaseModel
     }
 
     public function login(){
-        $namespace = config('ndexondeck.lauditor.connection_map.'.$this->connection,'App');
-        return $this->belongsTo($namespace.'\Login')->setEagerLoads([]);
+        $connection = $this->connection ? : "mysql";
+        $namespace = config('ndexondeck.lauditor.connection_map.'.$connection,'App\\');
+        return $this->belongsTo($namespace.'Login')->setEagerLoads([]);
     }
 
     public function scopeCommitted($q){
