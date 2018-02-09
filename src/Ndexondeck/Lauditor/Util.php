@@ -77,7 +77,7 @@ class Util implements UtilContract {
     /**
      * @param $format
      * @param $time
-     * @return static
+     * @return Carbon
      */
     public static function carbonFromFormat($format, $time){
         //
