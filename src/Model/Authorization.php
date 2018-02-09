@@ -493,15 +493,11 @@ class Authorization extends Audit
     }
 
     public function task(){
-        $connection = $this->connection ? : "mysql";
-        $namespace = config('ndexondeck.lauditor.connection_map.'.$connection,'App\\');
-        return $this->belongsTo($namespace.'Task');
+        return $this->belongsTo(Util::getNamespace($this->connection,'Task'));
     }
 
     public function staff(){
-        $connection = $this->connection ? : "mysql";
-        $namespace = config('ndexondeck.lauditor.connection_map.'.$connection,'App\\');
-        return $this->belongsTo($namespace.'Staff');
+        return $this->belongsTo(Util::getNamespace($this->connection,'Staff'));
     }
 
     public function scopeStatus($q,$type){

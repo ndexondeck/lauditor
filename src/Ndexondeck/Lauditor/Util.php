@@ -183,4 +183,18 @@ class Util implements UtilContract {
         return (new LengthAwarePaginator($result,$total,static::getPaginate()))->toArray();
     }
 
+    /**
+     * @param $connection
+     * @param $model_name
+     * @return array
+     * @internal param $result
+     * @internal param null $total
+     */
+    public static function getNamespace($connection, $model_name)
+    {
+        $connection = $connection ? : "mysql";
+        $namespace = config('ndexondeck.lauditor.connection_map.'.$connection,'App\\');
+        return $namespace.$model_name;
+    }
+
 }
