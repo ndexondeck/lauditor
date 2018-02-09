@@ -97,7 +97,7 @@ Interface UtilContract{
      * @param $model_name
      * @return string
      */
-    public static function getNamespace($connection, $model_name)
+    public static function getNamespace($connection, $model_name);
 
 
 }

@@ -60,7 +60,7 @@ Similar, do the same for
 ### Auditing
 
 ```php
-Use Lauditor\Model\Audit;
+Use Ndexondeck\Lauditor\Model\Audit;
 
 class YourAuditModel extends Audit {
 
@@ -70,7 +70,7 @@ class YourAuditModel extends Audit {
 ### Authorization
 
 ```php
-Use Lauditor\Model\Authorization;
+Use Ndexondeck\Lauditor\Model\Authorization;
 
 class YourAuthorizedModel extends Authorization {
 
@@ -136,3 +136,5 @@ The Audit model binds the creating, updating and deleting event listeners to the
 - Now lets get to see the available methods
 
 ...still loading
+
+...meanwhile thanks to Adekunle Adekoya (Crystoline) for Helping out with testing
