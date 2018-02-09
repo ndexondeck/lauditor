@@ -67,13 +67,13 @@ class Authorization extends Audit
 
                 $baseClass = class_basename($model);
 
-                $audit = new Audit();
+                $audit = (new Audit())->setConnection($connection);
                 $login = Util::login($connection);
 
                 $audit->status = 3;
                 $audit->action = "create";
                 $audit->user_action = static::generateUserAction($audit->action,$baseClass);
-                $audit->trail_type = "App\\" . $baseClass;
+                $audit->trail_type = get_class($model);
                 $audit->trail_id = 0;
                 $audit->ip = Util::getIp();
                 $audit->rid = '';
@@ -226,13 +226,13 @@ class Authorization extends Audit
 
                 $baseClass = class_basename($model);
 
-                $audit = new Audit();
+                $audit = (new Audit())->setConnection($connection);
                 $login = Util::login($connection);
 
                 $audit->status = 3;
                 $audit->action = "update";
                 $audit->user_action = static::generateUserAction($audit->action,$baseClass);
-                $audit->trail_type = "App\\" . $baseClass;
+                $audit->trail_type = get_class($model);
                 $audit->trail_id = $model->id;
                 $audit->ip = Util::getIp();
                 $audit->rid = '';
@@ -289,13 +289,13 @@ class Authorization extends Audit
 
                 $baseClass = class_basename($model);
 
-                $audit = new Audit();
+                $audit = (new Audit())->setConnection($connection);
                 $login = Util::login($connection);
 
                 $audit->status = 3;
                 $audit->action = "delete";
                 $audit->user_action = static::generateUserAction($audit->action,$baseClass);
-                $audit->trail_type = "App\\".$baseClass;
+                $audit->trail_type = get_class($model);
                 $audit->trail_id = $model->id;
                 $audit->ip = Util::getIp();;
                 $audit->rid =  '';
@@ -373,10 +373,11 @@ class Authorization extends Audit
     {
         $rid = static::makeRid();
 
-        $Authorization = Authorization::whereRid($rid)->whereIn('status', ['0','1'])->first();
+        $AuthorizationObject = (new Authorization())->setConnection($connection);
+
+        $Authorization = $AuthorizationObject->whereRid($rid)->whereIn('status', ['0','1'])->first();
 
         if(!$Authorization){
-            $Authorization = new Authorization();
 
             static::$auth_new = true;
 
@@ -384,7 +385,7 @@ class Authorization extends Audit
 
             if($task) $task = $task->id;
 
-            $Authorization = $Authorization->create([
+            $Authorization = $AuthorizationObject->create([
                 'action'=>static::$auth_action,
                 'task_id'=> $task,
                 'rid'=>$rid,
@@ -408,7 +409,7 @@ class Authorization extends Audit
 
             $checkMatches = ['action', 'before', 'after', 'trail_type', 'table_name'];
 
-            $v = Audit::with('authorization')->whereHas('authorization',function($q){
+            $v = $audit::with('authorization')->whereHas('authorization',function($q){
                 $q->where(function($q){
                     $q->where('status',0)->orWhere('status',1);
                 })->whereRaw((new Sql())->dateAdd("created_at",5,"MINUTE")." < '".Carbon::now()->toDateTimeString()."'");

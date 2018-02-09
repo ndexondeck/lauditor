@@ -41,10 +41,12 @@ return [
     ],
 
 //    'connections' => []
+
     'connection_map'=>[
         'mysql'=>'App\\',
         'mysql_school'=>'App\School\\'
-    ]
+    ],
 
+    'request_key' => ''
 
 ];

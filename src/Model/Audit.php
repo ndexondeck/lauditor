@@ -95,7 +95,7 @@ class Audit extends BaseModel
 
             if(Audit::isNotAllowed($model)) return true;
 
-            self::$audit = new Audit();
+            self::$audit = (new Audit())->setConnection($model->getConnectionName());;
             $audit = self::$audit;
 
             $audit->action = "create";
@@ -106,7 +106,7 @@ class Audit extends BaseModel
 
             if(Audit::isNotAllowed($model)) return true;
 
-            self::$audit = new Audit();
+            self::$audit = (new Audit())->setConnection($model->getConnectionName());;
             $audit = self::$audit;
 
             $audit->before = static::exclusiveJsonAttributes($model->getOriginal());
@@ -117,7 +117,7 @@ class Audit extends BaseModel
 
             if(Audit::isNotAllowed($model)) return true;
 
-            self::$audit = new Audit();
+            self::$audit = (new Audit())->setConnection($model->getConnectionName());;
             $audit = self::$audit;
 
             $audit->before = static::exclusiveJsonAttributes($model->getAttributes());
@@ -244,8 +244,16 @@ class Audit extends BaseModel
     }
 
     protected static function makeRid(){
+
+        if (defined("STDIN")) return sha1(time());
+
         if(!empty(static::$request_filters)){
-            $request = Request::get('data');
+            if(empty($key = config('ndexondeck.lauditor.request_key'))){
+                $request = Request::all();
+            }
+            else{
+                $request = Request::get($key);
+            }
 
             if(is_array($request))
                 return sha1(Request::url().serialize(array_intersect_key($request,array_flip(static::$request_filters))).date('Y-m'));
