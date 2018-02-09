@@ -186,9 +186,7 @@ class Util implements UtilContract {
     /**
      * @param $connection
      * @param $model_name
-     * @return array
-     * @internal param $result
-     * @internal param null $total
+     * @return string
      */
     public static function getNamespace($connection, $model_name)
     {

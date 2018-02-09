@@ -92,5 +92,12 @@ Interface UtilContract{
      */
     public static function paginate($result, $total=null);
 
+    /**
+     * @param $connection
+     * @param $model_name
+     * @return string
+     */
+    public static function getNamespace($connection, $model_name)
+
 
 }
