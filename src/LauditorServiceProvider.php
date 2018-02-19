@@ -22,6 +22,7 @@ class LauditorServiceProvider extends ServiceProvider
         $publishedMigrationPath = __DIR__.'/../published_migrations';
         $publishedUtilities = __DIR__.'/Ndexondeck';
         $publishedControllerPath = __DIR__.'/../published_controllers';
+        $publishedApiControllerPath = __DIR__.'/../published_controllers/Api';
         $routesPath = __DIR__.'/../routes.php';
         $seederPath = __DIR__.'/../sample/LauditorSetupSeeder.php';
 
@@ -34,6 +35,10 @@ class LauditorServiceProvider extends ServiceProvider
                 $modelPath => app_path(''),
                 $seederPath => database_path('seeds/LauditorSetupSeeder.php'),
             ], 'ndexondeck-lauditor');
+
+            $this->publishes([
+                $publishedApiControllerPath => app_path('Http/Controllers'),
+            ], 'ndexondeck-lauditor-apic');
         }
 
         $this->loadMigrationsFrom($migrationPath);

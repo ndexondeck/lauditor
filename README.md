@@ -15,6 +15,7 @@ Lauditor is a laravel based auditing and authorization package, which helps you 
     1. [Audit](#audit)
     1. [Authorization](#authorization)
     1. [Generating Tasks](#task-generate)
+    1. [Flushing Your DB](#db-flush)
 
 ## How?
 
@@ -82,6 +83,39 @@ class YourAuthorizedModel extends Authorization {
 This feature works with your routes, where unique route naming is ensured
 
 `php artisan task:genrate`
+
+### Flushing Your Database
+
+This feature can help you flush your database, even multiple database simultaneously. See help for more
+
+`php artisan db:flush`
+
+### Request and Response for APPLICATION API
+
+If you would like to document additional information like the request and response of all your API's, you can add "\Ndexondeck\Lauditor\Middleware\LogAfterRequest::class" the Http/Kernel.php file
+as shown below.
+
+```php
+    //...
+
+    /**
+     * The application's global HTTP middleware stack.
+     *
+     * These middleware are run during every request to your application.
+     *
+     * @var array
+     */
+    protected $middleware = [
+        \Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode::class,
+        \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
+        \App\Http\Middleware\TrimStrings::class,
+        \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+        \App\Http\Middleware\TrustProxies::class,
+        \Ndexondeck\Lauditor\Middleware\LogAfterRequest::class
+    ];
+    
+    //...
+```
 
 
 
