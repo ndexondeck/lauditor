@@ -298,7 +298,7 @@ class Audit extends BaseModel
                 'action'=>"$verb commit $audit->rid",
                 'rid'=>'Log',
                 'ip'=>Util::getIp(),
-                'status'=>2,
+                'status'=>'2',
                 'login_id'=>Util::getLoginId(),
                 'table_name'=>'audits',
                 'trail_type'=>get_class($audit),

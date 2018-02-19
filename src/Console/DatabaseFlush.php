@@ -50,10 +50,6 @@ class DatabaseFlush extends Command
      */
     public function handle()
     {
-        //
-        if(!is_dir('storage'))
-            throw new \Exception("Please run from laravel root folder");
-
         //reorder by migration sequence
         $migrations = [];
         try{
@@ -175,7 +171,7 @@ class DatabaseFlush extends Command
             $insert_sql .= $connection->enableChecks."\n";
 
             if(!$options['no-backup']) {
-                $path = "storage/app/";
+                $path = storage_path("app/");
 
                 //save file
                 $fn = 'db-backup-' . (md5($table_name)) . '.sql';

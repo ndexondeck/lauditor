@@ -70,7 +70,7 @@ class Authorization extends Audit
                 $audit = (new Audit())->setConnection($connection);
                 $login = Util::login($connection);
 
-                $audit->status = 3;
+                $audit->status = '3';
                 $audit->action = "create";
                 $audit->user_action = static::generateUserAction($audit->action,$baseClass);
                 $audit->trail_type = get_class($model);
@@ -229,7 +229,7 @@ class Authorization extends Audit
                 $audit = (new Audit())->setConnection($connection);
                 $login = Util::login($connection);
 
-                $audit->status = 3;
+                $audit->status = '3';
                 $audit->action = "update";
                 $audit->user_action = static::generateUserAction($audit->action,$baseClass);
                 $audit->trail_type = get_class($model);
@@ -292,7 +292,7 @@ class Authorization extends Audit
                 $audit = (new Audit())->setConnection($connection);
                 $login = Util::login($connection);
 
-                $audit->status = 3;
+                $audit->status = '3';
                 $audit->action = "delete";
                 $audit->user_action = static::generateUserAction($audit->action,$baseClass);
                 $audit->trail_type = get_class($model);
@@ -411,7 +411,7 @@ class Authorization extends Audit
 
             $v = $audit::with('authorization')->whereHas('authorization',function($q){
                 $q->where(function($q){
-                    $q->where('status',0)->orWhere('status',1);
+                    $q->where('status','0')->orWhere('status','1');
                 })->whereRaw((new Sql())->dateAdd("created_at",5,"MINUTE")." < '".Carbon::now()->toDateTimeString()."'");
             });
 
@@ -489,7 +489,7 @@ class Authorization extends Audit
 
     //Eloquent
     public function audits(){
-        return $this->hasMany('App\Audit');
+        return $this->hasMany(Audit::class);
     }
 
     public function task(){
