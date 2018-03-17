@@ -82,7 +82,7 @@ class YourAuthorizedModel extends Authorization {
 
 This feature works with your routes, where unique route naming is ensured
 
-`php artisan task:genrate`
+`php artisan task:generate`
 
 ### Flushing Your Database
 

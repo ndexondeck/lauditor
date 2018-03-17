@@ -5,6 +5,7 @@
 
 use App\Ndexondeck\Lauditor\Util;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 
 class ApiController extends Controller
