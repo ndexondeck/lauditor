@@ -4,9 +4,11 @@
 
 use App\Ndexondeck\Lauditor\Util;
 use Carbon\Carbon;
+use Ndexondeck\Lauditor\Contracts\AuditUser;
 use Ndexondeck\Lauditor\Model\Authorization;
+use Ndexondeck\Lauditor\Sql;
 
-class Login extends Authorization
+class Login extends Authorization implements AuditUser
 {
     //
 
@@ -188,6 +190,11 @@ class Login extends Authorization
         });
     }
 
+    function scopeBranch($q,$branch_id){
+        $sql = new Sql();
+        $q->whereRaw($sql->escaped("(select count(*) from `staff` where `logins`.`user_type` = '".$sql->morph("App\\Staff")."' and `logins`.`user_id` = `staff`.`id` and `staff`.`branch_id` = $branch_id) >= 1"));
+    }
+
     /**
      * @param $value
      */
@@ -203,6 +210,10 @@ class Login extends Authorization
 
     public function getOpenSessionAttribute(){
         return empty($this->trackers()->whereNull('date_logged_out')->first());
+    }
+
+    public function getFullnameAttribute(){
+        return $this->user->fullname;
     }
 
 }

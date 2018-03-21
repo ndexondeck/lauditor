@@ -280,4 +280,26 @@ class Sql{
         }
     }
 
+    public function getDefaultConstraint($table,$column){
+        switch($this->driver){
+            case "sqlsrv":
+                $filter = "DF__".substr($table,0,9)."__".substr($column,0,5)."%";
+                $result = $this->db()->select("SELECT * FROM sysobjects WHERE xtype = 'D' and name like '$filter'");
+                if(!empty($result)){
+                    return $result[0]->name;
+                }
+                return null;
+            default:
+                return null;
+        }
+
+    }
+
+    public function dropDefaultConstraint($table,$column){
+        if($constraint = $this->getDefaultConstraint($table, $column)){
+            return $this->db()->statement("ALTER TABLE $table DROP CONSTRAINT $constraint;");
+        }
+        return false;
+    }
+
 }

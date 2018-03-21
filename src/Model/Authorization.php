@@ -32,9 +32,19 @@ class Authorization extends Audit
 
     protected static $auth_new;
 
-    protected $fillable = ['action','rid','status','staff_id','comment','task_id'];
+    protected $fillable = ['action','rid','status','comment','task_id'];
 
-    public $hidden = ['staff_id','task_id'];
+    protected $hidden = ['task_id'];
+
+    protected static $config_key = "authorization_user";
+
+    function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
+
+        $this->hidden = array_merge($this->hidden,[static::getUserIdColumn()]);
+        $this->fillable = array_merge($this->fillable,[static::getUserIdColumn()]);
+    }
 
     /**
      * @return mixed
@@ -68,7 +78,7 @@ class Authorization extends Audit
                 $baseClass = class_basename($model);
 
                 $audit = (new Audit())->setConnection($connection);
-                $login = Util::login($connection);
+                $user = Util::login($connection);
 
                 $audit->status = '3';
                 $audit->action = "create";
@@ -80,9 +90,9 @@ class Authorization extends Audit
                 $audit->dependency = json_encode(static::$auth_dependency);
                 $audit->after = static::exclusiveJsonAttributes($model->getAttributes());
                 $audit->table_name = $model->getTable();
-                $audit->login_id = $login->id;
+                $audit->user_id = $user->id;
                 $audit->authorization_id = $Authorization->id;
-                $audit->user_name = $login->user->fullname." ($login->user_type_name)";
+                $audit->user_name = $user->fullname." ($user->user_type_name)";
                 $audit->task_route = Route::currentRouteName();
 
                 self::checkDuplicate($audit);
@@ -198,7 +208,7 @@ class Authorization extends Audit
                     if($model->status == "3"){
                         if($currentModel['status'] != "1") throw new ResponseException('authorize_rejects_only_forwarded');
 
-                        if(empty($model->comment) or empty($model->staff_id)) throw new ResponseException('missing_authorize_rejection_data');
+                        if(empty($model->comment) or empty($model->user_id)) throw new ResponseException('missing_authorize_rejection_data');
 
                         //we need to return all toggle states to its default
                         foreach($model->audits as $audit){
@@ -227,7 +237,7 @@ class Authorization extends Audit
                 $baseClass = class_basename($model);
 
                 $audit = (new Audit())->setConnection($connection);
-                $login = Util::login($connection);
+                $user = Util::login($connection);
 
                 $audit->status = '3';
                 $audit->action = "update";
@@ -240,9 +250,9 @@ class Authorization extends Audit
                 $audit->before = static::exclusiveJsonAttributes($model->getOriginal());
                 $audit->after = static::exclusiveJsonAttributes($model->getAttributes());
                 $audit->table_name = $model->getTable();
-                $audit->login_id = $login->id;
+                $audit->user_id = $user->id;
                 $audit->authorization_id = $Authorization->id;
-                $audit->user_name = $login->user->fullname." ($login->user_type_name)";
+                $audit->user_name = $user->fullname." ($user->user_type_name)";
                 $audit->task_route = Route::currentRouteName();
 
                 self::checkDuplicate($audit);
@@ -290,7 +300,7 @@ class Authorization extends Audit
                 $baseClass = class_basename($model);
 
                 $audit = (new Audit())->setConnection($connection);
-                $login = Util::login($connection);
+                $user = Util::login($connection);
 
                 $audit->status = '3';
                 $audit->action = "delete";
@@ -302,9 +312,9 @@ class Authorization extends Audit
                 $audit->dependency = json_encode(static::$auth_dependency);
                 $audit->before = static::exclusiveJsonAttributes($model->getAttributes());
                 $audit->table_name = $model->getTable();
-                $audit->login_id = $login->id;
+                $audit->user_id = $user->id;
                 $audit->authorization_id = $Authorization->id;
-                $audit->user_name = $login->user->fullname." ($login->user_type_name)";
+                $audit->user_name = $user->fullname." ($user->user_type_name)";
                 $audit->task_route = Route::currentRouteName();
 
                 self::checkDuplicate($audit);
@@ -496,8 +506,8 @@ class Authorization extends Audit
         return $this->belongsTo(Util::getNamespace($this->connection,'Task'));
     }
 
-    public function staff(){
-        return $this->belongsTo(Util::getNamespace($this->connection,'Staff'));
+    public function user(){
+        return $this->belongsTo(Util::getNamespace($this->connection,static::getUserModel()));
     }
 
     public function scopeStatus($q,$type){
@@ -510,27 +520,27 @@ class Authorization extends Audit
         if($type !== null) $q->whereStatus($type);
     }
 
-    public function scopePermitted($q,$staff){
+    public function scopePermitted($q,$user){
 
-        $q->whereHas('task',function($q) use ($staff){
-            $q->whereHas('authorizers',function($q) use ($staff){
-                $q->whereGroupId($staff->group_id);
+        $q->whereHas('task',function($q) use ($user){
+            $q->whereHas('authorizers',function($q) use ($user){
+                $q->whereGroupId($user->group_id);
             });
-        })->myBranch($staff);
+        })->myBranch($user);
     }
 
-    public function scopeMyBranch($q,$staff){
+    public function scopeMyBranch($q,$user){
 
-        $q->whereHas('audits',function($q) use ($staff){
-            $q->whereHas('login',function($q) use ($staff){
-                $q->branch($staff->branch_id);
+        $q->whereHas('audits',function($q) use ($user){
+            $q->whereHas('user',function($q) use ($user){
+                $q->branch($user->branch_id);
             });
         });
     }
 
-    public function scopeMe($q,$login_id=null){
-        $q->whereHas('audits',function($q) use ($login_id){
-            $q->where('login_id',($login_id)?$login_id:Util::getLoginId());
+    public function scopeMe($q,$user_id=null){
+        $q->whereHas('audits',function($q) use ($user_id){
+            $q->where(Audit::getUserIdColumn(),($user_id)?$user_id:Util::getLoginId());
         });
     }
 
@@ -552,4 +562,5 @@ class Authorization extends Audit
     public function getCommitAttribute(){
         return substr($this->attributes['rid'],0,6);
     }
+
 }

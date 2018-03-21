@@ -14,6 +14,7 @@ Lauditor is a laravel based auditing and authorization package, which helps you 
     1. [Publish Vendor Files](#publish)
     1. [Audit](#audit)
     1. [Authorization](#authorization)
+    1. [User Models](#user-model)
     1. [Generating Tasks](#task-generate)
     1. [Flushing Your DB](#db-flush)
 
@@ -74,6 +75,74 @@ class YourAuditModel extends Audit {
 Use Ndexondeck\Lauditor\Model\Authorization;
 
 class YourAuthorizedModel extends Authorization {
+
+}
+```
+
+### User Models
+
+This is the default user model configuration for auditing and authorization, you can change it if you user models are different
+```php
+'audit_user'=> [
+        'column' => 'login_id',
+        'model' => 'Login',
+        'table' => 'logins',
+    ],
+'authorization_user'=> [
+        'column' => 'staff_id',
+        'model' => 'Staff',
+        'table' => 'staff',
+    ],
+```
+
+Any model that will be used for audit user must implement the AuditUser interface
+```php
+use Ndexondeck\Lauditor\Contracts\AuditUser;
+
+class Login implements AuditUser{
+
+}
+```
+So if your config for audit user is like
+```php
+'audit_user'=> [
+        'column' => 'user_id',
+        'model' => 'User',
+        'table' => 'users',
+    ],
+```
+Then the User model must implement AuditUser as shown below
+```php
+use Ndexondeck\Lauditor\Contracts\AuditUser;
+
+class User implements AuditUser{
+
+}
+```
+
+
+Similarly, model that will be used for authorization user must implement the AuthorizationUser interface
+```php
+use Ndexondeck\Lauditor\Contracts\AuthorizationUser;
+
+class Staff implements AuthorizationUser{
+
+}
+```
+Also, if the same User model is to be used as authorization_user as shown in the config below
+```php
+'authorization_user'=> [
+        'column' => 'user_id',
+        'model' => 'User',
+        'table' => 'users',
+    ],
+```
+Then the User model must also implement AuthorizationUser as shown below
+```php
+use Ndexondeck\Lauditor\Contracts\AuditUser;
+use Ndexondeck\Lauditor\Contracts\AuthorizationUser;
+
+class User implements AuditUser,AuthorizationUser{
 
 }
 ```

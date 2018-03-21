@@ -6,10 +6,11 @@ use App\Ndexondeck\Lauditor\Util;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Request;
+use Ndexondeck\Lauditor\Contracts\AuthorizationUser;
 use Ndexondeck\Lauditor\Contracts\User;
 use Ndexondeck\Lauditor\Model\Authorization;
 
-class Staff extends Authorization implements User
+class Staff extends Authorization implements User,AuthorizationUser
 {
     //
     protected $fillable = ['group_id','employee_id','active_hour_id','fullname','email', 'holiday_login', 'weekend_login', 'enabled'];

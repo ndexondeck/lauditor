@@ -15,8 +15,10 @@ class CreateAuditsTable extends Migration
         Schema::create('audits', function (Blueprint $table) {
             $table->engine = 'InnoDB';
 
+            $audit_user = config('ndexondeck.lauditor.audit_user');
+
             $table->increments('id');
-            $table->integer('login_id')->unsigned();
+            $table->integer($audit_user['column'])->unsigned();
             $table->string('trail_type')->default('')->comment("The model base class name of a user type e.g App\\Staff");
             $table->integer('trail_id')->unsigned()->comment("The is of the record on the Model table");
             $table->integer('authorization_id')->unsigned()->nullable()->comment("To determine the authorization request that led to this audit where exists");
@@ -33,7 +35,7 @@ class CreateAuditsTable extends Migration
             $table->text('dependency')->nullable()->comment("A json value that keeps the trail state after an action");
             $table->timestamps();
 
-            $table->foreign('login_id')->references('id')->on('logins');
+            $table->foreign($audit_user['column'])->references('id')->on($audit_user['table']);
             $table->foreign('authorization_id')->references('id')->on('authorizations');
         });
     }

@@ -18,6 +18,7 @@ class LauditorSetupSeeder extends Seeder
 
         DB::table('active_hours')->insert(['name' => '24 hours','begin_time' => '00:00:00', 'end_time' => '23:59:59', 'created_at'=>$now,'updated_at'=>$now]);
 
+
         DB::table('groups')->insert([
             'name'=>'super administrators',
             'role'=>'SUPER_ADMINISTRATORS',
@@ -27,6 +28,7 @@ class LauditorSetupSeeder extends Seeder
             'created_at'=>$now,
             'updated_at'=>$now]);
 
+        //This assumes that you will be using the default config values for config('ndexondeck.lauditor.authorization_user')
         DB::table('staff')->insert([
             'group_id' => 1,
             'employee_id' => '0000',
@@ -39,6 +41,7 @@ class LauditorSetupSeeder extends Seeder
             'updated_at' => $now
         ]);
 
+        //This assumes that you will be using the default config values for config('ndexondeck.lauditor.audit_user')
         DB::table('logins')->insert([
             'username'=>'system',
             'password'=> password_hash('Password@123', PASSWORD_BCRYPT, ['cost' => 12]),
