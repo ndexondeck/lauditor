@@ -7,12 +7,13 @@ Lauditor is a laravel based auditing and authorization package, which helps you 
 ## Table of Contents
 
 1. [How](#how)
-    1. [Publish Vendor Files](#publish)
-    1. [Audit](#audit)
+    1. [Publish Vendor Files](#publish-vendor-files)
+    1. [Auditing](#auditing)
     1. [Authorization](#authorization)
-    1. [User Models](#user-model)
-    1. [Generating Tasks](#task-generate)
-    1. [Flushing Your DB](#db-flush)
+    1. [User Models](#user-models)
+    1. [Generating Tasks](#generating-tasks)
+    1. [Flushing Your Database](#flushing-your-database)
+    1. [Request and Response for APPLICATION API](#request-and-response-for-application-api)
 
 ## How?
 
@@ -87,7 +88,7 @@ class YourAuthorizedModel extends Authorization {
 }
 ```
 
-### <a name="user-model"></a>User Models
+### User Models
 
 This is the default user model configuration for auditing and authorization, you can change it if you user models are different
 ```php
