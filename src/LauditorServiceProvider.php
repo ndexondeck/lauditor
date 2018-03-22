@@ -40,6 +40,11 @@ class LauditorServiceProvider extends ServiceProvider
                 $configPath => config_path('ndexondeck'),
                 $publishedUtilities => app_path('Ndexondeck'),
                 $publishedApiControllerPath => app_path('Http/Controllers'),
+                $modelPath."/BaseModel.php" => app_path('BaseModel.php'),
+                $modelPath."/Module.php" => app_path('Module.php'),
+                $modelPath."/Task.php" => app_path('Task.php'),
+                $modelPath."/Permission.php" => app_path('Permission.php'),
+                $modelPath."/PermissionAuthorizer.php" => app_path('PermissionAuthorizer.php'),
             ], 'ndexondeck-lauditor-minimal');
 
             $this->publishes([

@@ -52,19 +52,19 @@ TO
 namespace App\Ndexondeck\Lauditor;
 ```
 
-Similar, do the same for the following if published
-1) app/BaseModel.php
+Similar, do the same for the following
+1) app/BaseModel.php (required)
+1) app/Module.php (required)
+1) app/Task.php (required)
+1) app/Permission.php (required)
+1) app/PermissionAuthorizer.php (required)
 1) app/Group.php
 1) app/Login.php
-1) app/Module.php
-1) app/Permission.php
-1) app/PermissionAuthorizer.php
 1) app/Staff.php
-1) app/Task.php
 
 => Note that all these models will be copied from the library, to you app folder, you can do away with or modify then where necessary
 
-=> Furthermore, there are certain methods in the Util class that needs to be updated
+=> Furthermore, there are certain methods in the Util class that needs to be updated, please see App\Ndexondeck\Lauditor\Util form more
 
 
 
@@ -90,7 +90,7 @@ class YourAuthorizedModel extends Authorization {
 
 ### User Models
 
-This is the default user model configuration for auditing and authorization, you can change it if you user models are different
+This is the default user model configuration for auditing and authorization, you can change it if your user models are different
 ```php
 'audit_user'=> [
         'column' => 'login_id',
@@ -130,7 +130,7 @@ class User implements AuditUser{
 ```
 
 
-Similarly, model that will be used for authorization user must implement the AuthorizationUser interface
+Similarly, models that will be used for authorization user must implement the AuthorizationUser interface
 ```php
 use Ndexondeck\Lauditor\Contracts\AuthorizationUser;
 
