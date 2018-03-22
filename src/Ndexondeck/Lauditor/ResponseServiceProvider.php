@@ -2,7 +2,6 @@
 
 //namespace App\Ndexondeck\Lauditor;
 
-
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Contracts\Routing\ResponseFactory;
 
