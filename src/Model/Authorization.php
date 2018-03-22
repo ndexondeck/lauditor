@@ -34,6 +34,8 @@ class Authorization extends Audit
 
     protected static $auth_new;
 
+    protected static $auth_init;
+
     protected $fillable = ['action','rid','status','comment','task_id'];
 
     protected $hidden = ['task_id'];
@@ -106,6 +108,13 @@ class Authorization extends Audit
                     self::checkDuplicate($audit);
 
                     $audit->save();
+
+                    if(static::$auth_init) {
+
+                        event('on.screen.notification',$Authorization);
+
+                        if($Authorization->status == 1) event('on.forwarding.authorization',$Authorization);
+                    }
 
                     return false;
                 } catch (\Exception $e){
@@ -274,6 +283,13 @@ class Authorization extends Audit
 
                     $audit->save();
 
+                    if(static::$auth_init) {
+
+                        event('on.screen.notification',$Authorization);
+
+                        if($Authorization->status == 1) event('on.forwarding.authorization',$Authorization);
+                    }
+
                     return false;
 
                 } catch (\Exception $e){
@@ -343,6 +359,13 @@ class Authorization extends Audit
 
                     $audit->save();
 
+                    if(static::$auth_init) {
+
+                        event('on.screen.notification',$Authorization);
+
+                        if($Authorization->status == 1) event('on.forwarding.authorization',$Authorization);
+                    }
+
                     return false;
                 } catch (\Exception $e){
 
@@ -354,15 +377,6 @@ class Authorization extends Audit
         });
 
         parent::boot();
-
-        static::created(function($model){
-            if(get_class($model) == self::class) {
-
-                event('on.screen.notification',$model);
-
-                if($model->status == 1) event('on.forwarding.authorization',$model);
-            }
-        });
 
         static::updated(function($model){
             if(get_class($model) == self::class) {
@@ -429,12 +443,16 @@ class Authorization extends Audit
                 'rid'=>$rid,
                 'status'=>((Util::setting('authorization_direct_forwarding') == "yes")?'1':'0')
             ]);
+
+            static::$auth_init = true;
         }
         else{
             if(!static::$auth_new){
                 if ($Authorization->status == '0') throw new ResponseException('duplicate_auth_request');
                 elseif ($Authorization->status == '1') throw new ResponseException('duplicate_forwarded_auth_request');
             }
+
+            static::$auth_init = false;
         }
 
         static::$auth_id = $Authorization->id;
