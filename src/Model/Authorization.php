@@ -2,6 +2,7 @@
 
 namespace Ndexondeck\Lauditor\Model;
 
+use App\Ndexondeck\Lauditor\Traits\AuthorizationTrait;
 use App\Ndexondeck\Lauditor\Util;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,7 @@ use Ndexondeck\Lauditor\Sql;
 class Authorization extends Audit
 {
     //
+    use AuthorizationTrait;
 
     protected static $auth_action;
 
