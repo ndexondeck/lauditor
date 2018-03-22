@@ -39,7 +39,7 @@ class LauditorServiceProvider extends ServiceProvider
             $this->publishes([
                 $configPath => config_path('ndexondeck'),
                 $publishedUtilities => app_path('Ndexondeck'),
-                $publishedApiControllerPath => app_path('Http/Controllers'),
+                $publishedApiControllerPath => app_path('Http/Controllers/Api'),
                 $modelPath."/BaseModel.php" => app_path('BaseModel.php'),
                 $modelPath."/Module.php" => app_path('Module.php'),
                 $modelPath."/Task.php" => app_path('Task.php'),
