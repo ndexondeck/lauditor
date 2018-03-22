@@ -4,8 +4,6 @@ Lauditor is a laravel based auditing and authorization package, which helps you 
 
 [![Total Downloads](https://poser.pugx.org/ndexondeck/lauditor/downloads.svg)](https://packagist.org/packages/ndexondeck/lauditor)
 
-[Ndexondeck](https://www.corasofttechltd.com)
-
 ## Table of Contents
 
 1. [How](#how)
