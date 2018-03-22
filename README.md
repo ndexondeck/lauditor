@@ -38,7 +38,7 @@ Some others would prefer:
 php artisan vendor:publish --tag=ndexondeck-lauditor-minimal
 ```
 
-***Note: If you would'nt be using the default controllers or models provided by this package. For instance, Login model will be published because it is the default Audit user model. Please take a look at [User Models](#user-model) before running your migrations***
+***Note: If you would'nt be using the default controllers or models provided by this package. For instance, Login model will be published because it is the default Audit user model. Please take a look at [User Models](#user-models) before running your migrations***
 
 
 After this please uncomment the name spaces in the following files
