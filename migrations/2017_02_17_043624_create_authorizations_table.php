@@ -15,7 +15,11 @@ class CreateAuthorizationsTable extends Migration
         Schema::create('authorizations', function (Blueprint $table) {
             $table->engine = 'InnoDB';
 
-            $authorization_user = config('ndexondeck.lauditor.authorization_user');
+            $authorization_user = config('ndexondeck.lauditor.authorization_user',[
+                'column' => 'staff_id',
+                'model' => 'Staff',
+                'table' => 'staff',
+            ]);
 
             $table->increments('id');
             $table->integer('task_id')->unsigned()->nullable();

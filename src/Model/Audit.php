@@ -39,6 +39,12 @@ class Audit extends BaseModel
     
     protected static $config_key = "audit_user";
 
+    protected static $default_configs = [
+        'column' => 'login_id',
+        'model' => 'Login',
+        'table' => 'logins',
+    ];
+
     function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
@@ -47,16 +53,15 @@ class Audit extends BaseModel
     }
 
     protected static function getUserTable(){
-        return config('ndexondeck.lauditor.'.static::$config_key.'.table');
+        return config('ndexondeck.lauditor.'.static::$config_key.'.table',static::$default_configs['table']);
     }
 
     protected static function getUserIdColumn(){
-        return config('ndexondeck.lauditor.'.static::$config_key.'.column');
+        return config('ndexondeck.lauditor.'.static::$config_key.'.column',static::$default_configs['column']);
     }
 
-    protected static function getUserModel()
-    {
-        return config('ndexondeck.lauditor.'.static::$config_key.'.model');
+    protected static function getUserModel(){
+        return config('ndexondeck.lauditor.'.static::$config_key.'.model',static::$default_configs['model']);
     }
 
     public static function transformPaginatedCollection($toArray)

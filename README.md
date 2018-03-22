@@ -2,11 +2,9 @@
 
 Lauditor is a laravel based auditing and authorization package, which helps you control your manage tasks, permissions and user groups. It is designed to manage all application tasks and user permission by utilization laravel's routes.
 
-[![Build Status](https://travis-ci.org/myclabs/DeepCopy.png?branch=master)](https://travis-ci.org/myclabs/DeepCopy)
-[![Coverage Status](https://coveralls.io/repos/myclabs/DeepCopy/badge.png?branch=master)](https://coveralls.io/r/myclabs/DeepCopy?branch=master)
-[![Scrutinizer Quality Score](https://scrutinizer-ci.com/g/myclabs/DeepCopy/badges/quality-score.png?s=2747100c19b275f93a777e3297c6c12d1b68b934)](https://scrutinizer-ci.com/g/myclabs/DeepCopy/)
-[![Total Downloads](https://poser.pugx.org/myclabs/deep-copy/downloads.svg)](https://packagist.org/packages/myclabs/deep-copy)
+[![Total Downloads](https://poser.pugx.org/ndexondeck/lauditor/downloads.svg)](https://packagist.org/packages/ndexondeck/lauditor)
 
+[Ndexondeck](https://www.corasofttechltd.com)
 
 ## Table of Contents
 
@@ -20,7 +18,7 @@ Lauditor is a laravel based auditing and authorization package, which helps you 
 
 ## How?
 
-Install with Composer:
+**Install with Composer:**
 
 ```
 composer require ndexondeck/lauditor
@@ -28,9 +26,21 @@ composer require ndexondeck/lauditor
 
 ### Publish Vendor Files
 
+Lauditor comes with predefined controllers and models to fast-track your development, but you may already have something in place that you are never going to replace.
+Then you may not want to publish all the files, so running the vendor:publish with minimal would be a better option, this ensures you only publish the necessary files.
+
+To publish all files
 ```
-php artisan vendor:publish --tag=ndexondeck-lauditor
+php artisan vendor:publish --tag=ndexondeck-lauditor-all
 ```
+
+Some others would prefer:
+```
+php artisan vendor:publish --tag=ndexondeck-lauditor-minimal
+```
+
+***Note: If you would'nt be using the default controllers or models provided by this package. For instance, Login model will be published because it is the default Audit user model. Please take a look at [User Models](#user-model) before running your migrations***
+
 
 After this please uncomment the name spaces in the following files
 
@@ -43,7 +53,7 @@ TO
 namespace App\Ndexondeck\Lauditor;
 ```
 
-Similar, do the same for
+Similar, do the same for the following if published
 1) app/BaseModel.php
 1) app/Group.php
 1) app/Login.php
@@ -79,7 +89,7 @@ class YourAuthorizedModel extends Authorization {
 }
 ```
 
-### User Models
+### <a name="user-model"></a>User Models
 
 This is the default user model configuration for auditing and authorization, you can change it if you user models are different
 ```php

@@ -34,11 +34,17 @@ class LauditorServiceProvider extends ServiceProvider
                 $publishedUtilities => app_path('Ndexondeck'),
                 $modelPath => app_path(''),
                 $seederPath => database_path('seeds/LauditorSetupSeeder.php'),
-            ], 'ndexondeck-lauditor');
+            ], 'ndexondeck-lauditor-all');
+
+            $this->publishes([
+                $configPath => config_path('ndexondeck'),
+                $publishedUtilities => app_path('Ndexondeck'),
+                $publishedApiControllerPath => app_path('Http/Controllers'),
+            ], 'ndexondeck-lauditor-minimal');
 
             $this->publishes([
                 $publishedApiControllerPath => app_path('Http/Controllers'),
-            ], 'ndexondeck-lauditor-apic');
+            ], 'ndexondeck-lauditor-only-api-controller');
         }
 
         $this->loadMigrationsFrom($migrationPath);

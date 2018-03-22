@@ -15,7 +15,11 @@ class CreateAuditsTable extends Migration
         Schema::create('audits', function (Blueprint $table) {
             $table->engine = 'InnoDB';
 
-            $audit_user = config('ndexondeck.lauditor.audit_user');
+            $audit_user = config('ndexondeck.lauditor.audit_user',[
+                'column' => 'login_id',
+                'model' => 'Login',
+                'table' => 'logins',
+            ]);
 
             $table->increments('id');
             $table->integer($audit_user['column'])->unsigned();

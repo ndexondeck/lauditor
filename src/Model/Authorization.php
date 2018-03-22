@@ -38,6 +38,12 @@ class Authorization extends Audit
 
     protected static $config_key = "authorization_user";
 
+    protected static $default_configs = [
+        'column' => 'staff_id',
+        'model' => 'Staff',
+        'table' => 'staff',
+    ];
+
     function __construct(array $attributes = [])
     {
         parent::__construct($attributes);
