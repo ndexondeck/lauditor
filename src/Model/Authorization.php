@@ -50,8 +50,8 @@ class Authorization extends Audit
     {
         parent::__construct($attributes);
 
-        $this->hidden = array_merge($this->hidden,[static::getUserIdColumn()]);
-        $this->fillable = array_merge($this->fillable,[static::getUserIdColumn()]);
+        $this->hidden = array_merge($this->hidden,[static::getLauditorUserIdColumn()]);
+        $this->fillable = array_merge($this->fillable,[static::getLauditorUserIdColumn()]);
     }
 
     /**
@@ -80,34 +80,40 @@ class Authorization extends Audit
                 throw new ResponseException('missing_authorization_action');
             }
             else{
+                try{
+                    $Authorization = self::getAuth($connection);
 
-                $Authorization = self::getAuth($connection);
+                    $baseClass = class_basename($model);
 
-                $baseClass = class_basename($model);
+                    $audit = (new Audit())->setConnection($connection);
+                    $user = Util::login($connection);
 
-                $audit = (new Audit())->setConnection($connection);
-                $user = Util::login($connection);
+                    $audit->status = '3';
+                    $audit->action = "create";
+                    $audit->user_action = static::generateUserAction($audit->action,$baseClass);
+                    $audit->trail_type = get_class($model);
+                    $audit->trail_id = 0;
+                    $audit->ip = Util::getIp();
+                    $audit->rid = '';
+                    $audit->dependency = json_encode(static::$auth_dependency);
+                    $audit->after = static::exclusiveJsonAttributes($model->getAttributes());
+                    $audit->table_name = $model->getTable();
+                    $audit->lauditor_user_id = $user->id;
+                    $audit->authorization_id = $Authorization->id;
+                    $audit->user_name = $user->fullname." ($user->user_type_name)";
+                    $audit->task_route = Route::currentRouteName();
 
-                $audit->status = '3';
-                $audit->action = "create";
-                $audit->user_action = static::generateUserAction($audit->action,$baseClass);
-                $audit->trail_type = get_class($model);
-                $audit->trail_id = 0;
-                $audit->ip = Util::getIp();
-                $audit->rid = '';
-                $audit->dependency = json_encode(static::$auth_dependency);
-                $audit->after = static::exclusiveJsonAttributes($model->getAttributes());
-                $audit->table_name = $model->getTable();
-                $audit->user_id = $user->id;
-                $audit->authorization_id = $Authorization->id;
-                $audit->user_name = $user->fullname." ($user->user_type_name)";
-                $audit->task_route = Route::currentRouteName();
+                    self::checkDuplicate($audit);
 
-                self::checkDuplicate($audit);
+                    $audit->save();
 
-                $audit->save();
+                    return false;
+                } catch (\Exception $e){
 
-                return false;
+                    if(isset($audit)) static::rollbackRequest($audit->getConnectionName());
+
+                    throw $e;
+                }
             }
         });
 
@@ -216,7 +222,7 @@ class Authorization extends Audit
                     if($model->status == "3"){
                         if($currentModel['status'] != "1") throw new ResponseException('authorize_rejects_only_forwarded');
 
-                        if(empty($model->comment) or empty($model->user_id)) throw new ResponseException('missing_authorize_rejection_data');
+                        if(empty($model->comment) or empty($model->lauditor_user_id)) throw new ResponseException('missing_authorize_rejection_data');
 
                         //we need to return all toggle states to its default
                         foreach($model->audits as $audit){
@@ -240,34 +246,42 @@ class Authorization extends Audit
             }
             else {
 
-                $Authorization = self::getAuth($connection);
+                try{
+                    $Authorization = self::getAuth($connection);
 
-                $baseClass = class_basename($model);
+                    $baseClass = class_basename($model);
 
-                $audit = (new Audit())->setConnection($connection);
-                $user = Util::login($connection);
+                    $audit = (new Audit())->setConnection($connection);
+                    $user = Util::login($connection);
 
-                $audit->status = '3';
-                $audit->action = "update";
-                $audit->user_action = static::generateUserAction($audit->action,$baseClass);
-                $audit->trail_type = get_class($model);
-                $audit->trail_id = $model->id;
-                $audit->ip = Util::getIp();
-                $audit->rid = '';
-                $audit->dependency = json_encode(static::$auth_dependency);
-                $audit->before = static::exclusiveJsonAttributes($model->getOriginal());
-                $audit->after = static::exclusiveJsonAttributes($model->getAttributes());
-                $audit->table_name = $model->getTable();
-                $audit->user_id = $user->id;
-                $audit->authorization_id = $Authorization->id;
-                $audit->user_name = $user->fullname." ($user->user_type_name)";
-                $audit->task_route = Route::currentRouteName();
+                    $audit->status = '3';
+                    $audit->action = "update";
+                    $audit->user_action = static::generateUserAction($audit->action,$baseClass);
+                    $audit->trail_type = get_class($model);
+                    $audit->trail_id = $model->id;
+                    $audit->ip = Util::getIp();
+                    $audit->rid = '';
+                    $audit->dependency = json_encode(static::$auth_dependency);
+                    $audit->before = static::exclusiveJsonAttributes($model->getOriginal());
+                    $audit->after = static::exclusiveJsonAttributes($model->getAttributes());
+                    $audit->table_name = $model->getTable();
+                    $audit->lauditor_user_id = $user->id;
+                    $audit->authorization_id = $Authorization->id;
+                    $audit->user_name = $user->fullname." ($user->user_type_name)";
+                    $audit->task_route = Route::currentRouteName();
 
-                self::checkDuplicate($audit);
+                    self::checkDuplicate($audit);
 
-                $audit->save();
+                    $audit->save();
 
-                return false;
+                    return false;
+
+                } catch (\Exception $e){
+
+                    if(isset($audit)) static::rollbackRequest($audit->getConnectionName());
+
+                    throw $e;
+                }
             }
         });
 
@@ -302,34 +316,40 @@ class Authorization extends Audit
                 throw new ResponseException('missing_authorization_action');
             }
             else{
+                try{
+                    $Authorization = self::getAuth($connection);
 
-                $Authorization = self::getAuth($connection);
+                    $baseClass = class_basename($model);
 
-                $baseClass = class_basename($model);
+                    $audit = (new Audit())->setConnection($connection);
+                    $user = Util::login($connection);
 
-                $audit = (new Audit())->setConnection($connection);
-                $user = Util::login($connection);
+                    $audit->status = '3';
+                    $audit->action = "delete";
+                    $audit->user_action = static::generateUserAction($audit->action,$baseClass);
+                    $audit->trail_type = get_class($model);
+                    $audit->trail_id = $model->id;
+                    $audit->ip = Util::getIp();;
+                    $audit->rid =  '';
+                    $audit->dependency = json_encode(static::$auth_dependency);
+                    $audit->before = static::exclusiveJsonAttributes($model->getAttributes());
+                    $audit->table_name = $model->getTable();
+                    $audit->lauditor_user_id = $user->id;
+                    $audit->authorization_id = $Authorization->id;
+                    $audit->user_name = $user->fullname." ($user->user_type_name)";
+                    $audit->task_route = Route::currentRouteName();
 
-                $audit->status = '3';
-                $audit->action = "delete";
-                $audit->user_action = static::generateUserAction($audit->action,$baseClass);
-                $audit->trail_type = get_class($model);
-                $audit->trail_id = $model->id;
-                $audit->ip = Util::getIp();;
-                $audit->rid =  '';
-                $audit->dependency = json_encode(static::$auth_dependency);
-                $audit->before = static::exclusiveJsonAttributes($model->getAttributes());
-                $audit->table_name = $model->getTable();
-                $audit->user_id = $user->id;
-                $audit->authorization_id = $Authorization->id;
-                $audit->user_name = $user->fullname." ($user->user_type_name)";
-                $audit->task_route = Route::currentRouteName();
+                    self::checkDuplicate($audit);
 
-                self::checkDuplicate($audit);
+                    $audit->save();
 
-                $audit->save();
+                    return false;
+                } catch (\Exception $e){
 
-                return false;
+                    if(isset($audit)) static::rollbackRequest($audit->getConnectionName());
+
+                    throw $e;
+                }
             }
         });
 
@@ -442,11 +462,9 @@ class Authorization extends Audit
             if (!$v->isEmpty()) {
                 foreach ($v as $val) {
                     if ($val->authorization->status == '0'){
-                        static::rollbackRequest($audit->getConnectionName());
                         throw new ResponseException('similar_auth_request');
                     }
                     elseif ($val->authorization->status == '1'){
-                        static::rollbackRequest($audit->getConnectionName());
                         throw new ResponseException('similar_forwarded_auth_request');
                     }
                 }
@@ -514,8 +532,8 @@ class Authorization extends Audit
         return $this->belongsTo(Util::getNamespace($this->connection,'Task'));
     }
 
-    public function user(){
-        return $this->belongsTo(Util::getNamespace($this->connection,static::getUserModel()));
+    public function lauditor_user(){
+        return $this->belongsTo(Util::getNamespace($this->connection,static::getLauditorUserModel()))->setEagerLoads([]);
     }
 
     public function scopeStatus($q,$type){
@@ -546,9 +564,9 @@ class Authorization extends Audit
         });
     }
 
-    public function scopeMe($q,$user_id=null){
-        $q->whereHas('audits',function($q) use ($user_id){
-            $q->where(Audit::getUserIdColumn(),($user_id)?$user_id:Util::getLoginId());
+    public function scopeMe($q,$lauditor_user_id=null){
+        $q->whereHas('audits',function($q) use ($lauditor_user_id){
+            $q->where(Audit::getLauditorUserIdColumn(),($lauditor_user_id)?$lauditor_user_id:Util::getLoginId());
         });
     }
 

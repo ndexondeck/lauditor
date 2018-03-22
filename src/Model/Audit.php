@@ -52,18 +52,18 @@ class Audit extends BaseModel
     {
         parent::__construct($attributes);
 
-        $this->hidden = array_merge($this->hidden,[static::getUserIdColumn()]);
+        $this->hidden = array_merge($this->hidden,[static::getLauditorUserIdColumn()]);
     }
 
-    protected static function getUserTable(){
+    protected static function getLauditorUserTable(){
         return config('ndexondeck.lauditor.'.static::$config_key.'.table',static::$default_configs['table']);
     }
 
-    protected static function getUserIdColumn(){
+    protected static function getLauditorUserIdColumn(){
         return config('ndexondeck.lauditor.'.static::$config_key.'.column',static::$default_configs['column']);
     }
 
-    protected static function getUserModel(){
+    protected static function getLauditorUserModel(){
         return config('ndexondeck.lauditor.'.static::$config_key.'.model',static::$default_configs['model']);
     }
 
@@ -112,7 +112,7 @@ class Audit extends BaseModel
     public static function setTempAudit($audit)
     {
         static::$temp_audit = [
-            static::getUserIdColumn()=>$audit->user_id,
+            static::getLauditorUserIdColumn()=>$audit->lauditor_user_id,
             'ip'=>$audit->ip,
             'user_name'=>$audit->user_name,
             'task_route'=>$audit->task_route,
@@ -165,14 +165,14 @@ class Audit extends BaseModel
 
             if(isset(static::$approving)) {
                 $audit->authorization_id = static::$approving;
-                $audit->user_id = static::getTempAudit(static::getUserIdColumn());
+                $audit->lauditor_user_id = static::getTempAudit(static::getLauditorUserIdColumn());
                 $audit->ip = static::getTempAudit('ip');
                 $audit->user_name = static::getTempAudit('user_name');
                 $audit->task_route = static::getTempAudit('task_route');
             }
             else{
                 $user = Util::login($model->getConnectionName());
-                $audit->user_id = $user->id;
+                $audit->lauditor_user_id = $user->id;
                 $audit->ip = Util::getIp();
                 $audit->user_name = $user->fullname." ($user->user_type_name)";
                 $audit->task_route = Route::currentRouteName();
@@ -201,14 +201,14 @@ class Audit extends BaseModel
             $audit = self::$audit;
             if(isset(static::$approving)) {
                 $audit->authorization_id = static::$approving;
-                $audit->user_id = static::getTempAudit(static::getUserIdColumn());
+                $audit->lauditor_user_id = static::getTempAudit(static::getLauditorUserIdColumn());
                 $audit->ip = static::getTempAudit('ip');
                 $audit->user_name = static::getTempAudit('user_name');
                 $audit->task_route = static::getTempAudit('task_route');
             }
             else{
                 $user = Util::login($model->getConnectionName());
-                $audit->user_id = $user->id;
+                $audit->lauditor_user_id = $user->id;
                 $audit->ip = Util::getIp();
                 $audit->user_name = $user->fullname." ($user->user_type_name)";
                 $audit->task_route = Route::currentRouteName();
@@ -236,14 +236,14 @@ class Audit extends BaseModel
             $audit = self::$audit;
             if(isset(static::$approving)) {
                 $audit->authorization_id = static::$approving;
-                $audit->user_id = static::getTempAudit(static::getUserIdColumn());
+                $audit->lauditor_user_id = static::getTempAudit(static::getLauditorUserIdColumn());
                 $audit->ip = static::getTempAudit('ip');
                 $audit->user_name = static::getTempAudit('user_name');
                 $audit->task_route = static::getTempAudit('task_route');
             }
             else{
                 $user = Util::login($model->getConnectionName());
-                $audit->user_id = $user->id;
+                $audit->lauditor_user_id = $user->id;
                 $audit->ip = Util::getIp();
                 $audit->user_name = $user->fullname." ($user->user_type_name)";
                 $audit->task_route = Route::currentRouteName();
@@ -260,7 +260,7 @@ class Audit extends BaseModel
             $audit->rid = static::makeRid();
             $audit->trail_id = $model->id;
             $audit->trail_type = get_class($model);
-            $audit->user_id = Util::getLoginId();
+            $audit->lauditor_user_id = Util::getLoginId();
             $audit->save();
         });
     }
@@ -329,7 +329,7 @@ class Audit extends BaseModel
                 'rid'=>'Log',
                 'ip'=>Util::getIp(),
                 'status'=>'2',
-                static::getUserIdColumn()=>Util::getLoginId(),
+                static::getLauditorUserIdColumn()=>Util::getLoginId(),
                 'table_name'=>'audits',
                 'trail_type'=>get_class($audit),
                 'trail_id'=>$audit->id,
@@ -603,8 +603,8 @@ class Audit extends BaseModel
         return $this->belongsTo('Ndexondeck\Lauditor\Model\Authorization');
     }
 
-    public function user(){
-        return $this->belongsTo(Util::getNamespace($this->connection,static::getUserModel()))->setEagerLoads([]);
+    public function lauditor_user(){
+        return $this->belongsTo(Util::getNamespace($this->connection,static::getLauditorUserModel()))->setEagerLoads([]);
     }
 
     public function scopeCommitted($q){
@@ -656,12 +656,12 @@ class Audit extends BaseModel
         return substr($this->attributes['rid'],0,6);
     }
 
-    public function getUserIdAttribute(){
-        return $this->{static::getUserIdColumn()};
+    public function getLauditorUserIdAttribute(){
+        return $this->{static::getLauditorUserIdColumn()};
     }
 
-    public function setUserIdAttribute($value){
-        $this->attributes[static::getUserIdColumn()] = $value;
+    public function setLauditorUserIdAttribute($value){
+        $this->attributes[static::getLauditorUserIdColumn()] = $value;
     }
     
 }
