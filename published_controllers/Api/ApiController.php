@@ -36,7 +36,7 @@ class ApiController extends Controller
             if (!$route)
                 continue;
 
-            $method = $value->methods[0];
+            $method = implode(',',$value->methods[0]);
             if (!$method == "PATCH")
                 continue;
 
@@ -133,7 +133,7 @@ class ApiController extends Controller
             if (!$route)
                 continue;
 
-            $method = $value->methods[0];
+            $method = implode(',',$value->methods[0]);
             if (!$method == "PATCH")
                 continue;
 
@@ -221,7 +221,7 @@ class ApiController extends Controller
         $route = $value->getName();
         if (!$route) return false;
 
-        $method = $value->methods[0];
+        $method = implode(',',$value->methods[0]);
         if (!$method == "PATCH") return false;
 
         $controller = explode("@", $value->getActionName());
