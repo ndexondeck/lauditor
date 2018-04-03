@@ -64,7 +64,7 @@ class AuditTransformer extends AbstractTransformer
 
 		$transformer = explode(":",Audit::$transformer[$key]);
 
-		if(!isset(static::$store[$transformer[0]])) static::$store[$transformer[0]] = DB::connection(static::$audit->getConnectionName())->table($transformer[0])->selectRaw("$transformer[1] aliased,$transformer[2]")->lists('aliased',$transformer[2]);
+		if(!isset(static::$store[$transformer[0]])) static::$store[$transformer[0]] = DB::connection(static::$audit->getConnectionName())->table($transformer[0])->selectRaw("$transformer[1] aliased,$transformer[2]")->pluck('aliased',$transformer[2]);
 
         if($value and isset(static::$store[$transformer[0]][$value])) return [str_singular($transformer[0]),static::$store[$transformer[0]][$value]];
         elseif($value) {
