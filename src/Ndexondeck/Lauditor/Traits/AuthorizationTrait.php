@@ -4,4 +4,7 @@
 
 Trait AuthorizationTrait{
 
+    public static function unsetDependency(){
+        static::$auth_dependency = null;
+    }
 }

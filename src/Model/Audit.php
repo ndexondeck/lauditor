@@ -24,8 +24,6 @@ class Audit extends BaseModel
 
     protected static $request_filters = [];
 
-    public static $transformer;
-
     public static $excluded = ['Audit','Authorization'];
 
     protected static $user_action = [];
@@ -353,7 +351,6 @@ class Audit extends BaseModel
     }
 
     public static function getValue($connection,$key,$value){
-        static::$transformer = config('ndexondeck.lauditor.transformer');
 
         if(!isset(static::$transformer[$key])) return $value;
 
