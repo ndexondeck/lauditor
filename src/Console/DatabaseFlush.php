@@ -33,6 +33,7 @@ class DatabaseFlush extends Command
     private $preStatement = '';
     private $postStatement = '';
     private $quotes = '"';
+    private $escape = true;
 
     /**
      * Create a new command instance.
@@ -86,6 +87,7 @@ class DatabaseFlush extends Command
                     $this->quotes = "'";
                     $this->preStatement = "SET IDENTITY_INSERT dbo.%s ON;";
                     $this->postStatement = "SET IDENTITY_INSERT dbo.%s OFF;";
+                    $this->escape = false;
                     break;
                 default: break;
             }
@@ -249,7 +251,7 @@ class DatabaseFlush extends Command
 
                 foreach($row as $key=>$field)
                 {
-                    $field = is_null($field)?null:str_replace("\n","\\n",addslashes($field));
+                    $field = is_null($field)? null : ($this->escape ? str_replace("\n","\\n",addslashes($field)) : str_replace("'","''",$field));
                     if (isset($field)) { $return.= $this->quotes.$field.$this->quotes ; } else { $return.= 'NULL'; }
                     if ($key != $last_column) { $return.= ','; }
                 }
