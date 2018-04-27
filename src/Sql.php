@@ -249,7 +249,6 @@ class Sql{
         }
     }
 
-
     public function resetAutoIncrement($table)
     {
         switch($this->driver){
@@ -257,6 +256,26 @@ class Sql{
                 return null;
             default:
                 return $this->db()->statement("ALTER TABLE $table AUTO_INCREMENT = 1");
+        }
+    }
+
+    public function groupByYearMonth($column='created_at')
+    {
+        switch($this->driver){
+            case "sqlsrv":
+                return "convert(varchar(7),$column,21)";
+            default:
+                return "EXTRACT(YEAR_MONTH FROM $column)";
+        }
+    }
+
+    public function groupByYear($column='created_at')
+    {
+        switch($this->driver){
+            case "sqlsrv":
+                return "convert(varchar(4),$column,21)";
+            default:
+                return "EXTRACT(YEAR FROM $column)";
         }
     }
 
