@@ -576,7 +576,7 @@ class Authorization extends Audit
     public function scopeMyBranch($q,$user){
 
         $q->whereHas('audits',function($q) use ($user){
-            $q->whereHas('user',function($q) use ($user){
+            $q->whereHas('lauditor_user',function($q) use ($user){
                 $q->branch($user->branch_id);
             });
         });
