@@ -601,7 +601,7 @@ class Audit extends BaseModel
     }
 
     public function lauditor_user(){
-        return $this->belongsTo(Util::getNamespace($this->connection,static::getLauditorUserModel()))->setEagerLoads([]);
+        return $this->belongsTo(Util::getNamespace($this->connection,static::getLauditorUserModel()), static::getLauditorUserIdColumn())->setEagerLoads([]);
     }
 
     public function scopeCommitted($q){
